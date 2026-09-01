@@ -1,0 +1,17 @@
+{
+  "name": "@scrapo/eslint-config",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "exports": {
+    "./base": "./base.mjs",
+    "./next": "./next.mjs"
+  },
+  "dependencies": {
+    "@eslint/js": "^9.35.0",
+    "eslint": "^9.35.0",
+    "eslint-config-next": "16.3.4",
+    "globals": "^16.3.0",
+    "typescript-eslint": "^8.42.0"
+  }
+}

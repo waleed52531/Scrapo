@@ -1,0 +1,31 @@
+{
+  "name": "scrapo-lead-hunter",
+  "version": "0.1.0",
+  "private": true,
+  "packageManager": "pnpm@11.25.0",
+  "engines": {
+    "node": ">=22"
+  },
+  "scripts": {
+    "dev": "concurrently -n web,api,worker -c blue,green,magenta \"pnpm dev:web\" \"pnpm dev:api\" \"pnpm dev:worker\"",
+    "dev:web": "pnpm --filter @scrapo/web dev",
+    "dev:api": "pnpm --filter @scrapo/api dev",
+    "dev:worker": "pnpm --filter @scrapo/worker dev",
+    "build": "pnpm -r --if-present build",
+    "typecheck": "pnpm -r --if-present typecheck",
+    "lint": "pnpm -r --if-present lint",
+    "test": "pnpm -r --if-present test",
+    "test:e2e": "pnpm --filter @scrapo/api test:e2e",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "db:generate": "pnpm --filter @scrapo/database generate",
+    "db:migrate": "pnpm --filter @scrapo/database migrate:dev",
+    "db:migrate:deploy": "pnpm --filter @scrapo/database migrate:deploy",
+    "db:seed": "pnpm --filter @scrapo/database seed",
+    "db:studio": "pnpm --filter @scrapo/database studio"
+  },
+  "devDependencies": {
+    "concurrently": "^9.2.1",
+    "prettier": "^3.6.2"
+  }
+}

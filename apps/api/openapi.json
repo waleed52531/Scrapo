@@ -1,0 +1,1274 @@
+{
+  "openapi": "3.0.0",
+  "paths": {
+    "/api/v1/health": {
+      "get": {
+        "operationId": "HealthController_health",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "summary": "Check API and database health",
+        "tags": [
+          "health"
+        ]
+      }
+    },
+    "/api/v1/dashboard": {
+      "get": {
+        "operationId": "DashboardController_get",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Get the current workspace pipeline summary",
+        "tags": [
+          "dashboard"
+        ]
+      }
+    },
+    "/api/v1/companies": {
+      "get": {
+        "operationId": "CompaniesController_list",
+        "parameters": [
+          {
+            "name": "page",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "minimum": 1,
+              "default": 1,
+              "type": "number"
+            }
+          },
+          {
+            "name": "limit",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "minimum": 1,
+              "maximum": 100,
+              "default": 20,
+              "type": "number"
+            }
+          },
+          {
+            "name": "search",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "country",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "hasMobileService",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "boolean"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "List workspace companies",
+        "tags": [
+          "companies"
+        ]
+      },
+      "post": {
+        "operationId": "CompaniesController_create",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateCompanyDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Create a company",
+        "tags": [
+          "companies"
+        ]
+      }
+    },
+    "/api/v1/companies/{id}": {
+      "get": {
+        "operationId": "CompaniesController_get",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Get a company",
+        "tags": [
+          "companies"
+        ]
+      },
+      "patch": {
+        "operationId": "CompaniesController_update",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateCompanyDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Update a company",
+        "tags": [
+          "companies"
+        ]
+      },
+      "delete": {
+        "operationId": "CompaniesController_delete",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Delete a company",
+        "tags": [
+          "companies"
+        ]
+      }
+    },
+    "/api/v1/contacts": {
+      "get": {
+        "operationId": "ContactsController_list",
+        "parameters": [
+          {
+            "name": "page",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "minimum": 1,
+              "default": 1,
+              "type": "number"
+            }
+          },
+          {
+            "name": "limit",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "minimum": 1,
+              "maximum": 100,
+              "default": 20,
+              "type": "number"
+            }
+          },
+          {
+            "name": "search",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "companyId",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          },
+          {
+            "name": "emailStatus",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "UNKNOWN",
+                "GUESSED",
+                "UNVERIFIED",
+                "VERIFIED",
+                "INVALID",
+                "BOUNCED"
+              ]
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "List workspace contacts",
+        "tags": [
+          "contacts"
+        ]
+      },
+      "post": {
+        "operationId": "ContactsController_create",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateContactDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Create a contact",
+        "tags": [
+          "contacts"
+        ]
+      }
+    },
+    "/api/v1/contacts/{id}": {
+      "get": {
+        "operationId": "ContactsController_get",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Get a contact",
+        "tags": [
+          "contacts"
+        ]
+      },
+      "patch": {
+        "operationId": "ContactsController_update",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateContactDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Update a contact",
+        "tags": [
+          "contacts"
+        ]
+      },
+      "delete": {
+        "operationId": "ContactsController_delete",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Delete a contact",
+        "tags": [
+          "contacts"
+        ]
+      }
+    },
+    "/api/v1/leads": {
+      "get": {
+        "operationId": "LeadsController_list",
+        "parameters": [
+          {
+            "name": "page",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "minimum": 1,
+              "default": 1,
+              "type": "number"
+            }
+          },
+          {
+            "name": "limit",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "minimum": 1,
+              "maximum": 100,
+              "default": 20,
+              "type": "number"
+            }
+          },
+          {
+            "name": "status",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "NEW",
+                "ANALYZING",
+                "QUALIFIED",
+                "SHORTLISTED",
+                "DRAFTED",
+                "APPROVED",
+                "CONTACTED",
+                "FOLLOW_UP",
+                "REPLIED",
+                "INTERESTED",
+                "MEETING",
+                "PROPOSAL",
+                "WON",
+                "LOST",
+                "NOT_INTERESTED",
+                "DO_NOT_CONTACT",
+                "INVALID"
+              ]
+            }
+          },
+          {
+            "name": "temperature",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "HOT",
+                "STRONG",
+                "REVIEW",
+                "WEAK",
+                "REJECT"
+              ]
+            }
+          },
+          {
+            "name": "source",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "X",
+                "REDDIT",
+                "TELEGRAM",
+                "WEB",
+                "AGENCY_DIRECTORY",
+                "MANUAL"
+              ]
+            }
+          },
+          {
+            "name": "leadType",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "AGENCY_PARTNER",
+                "ACTIVE_REQUIREMENT",
+                "BUSINESS_OPPORTUNITY",
+                "MANUAL"
+              ]
+            }
+          },
+          {
+            "name": "country",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "company",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "minimumScore",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "minimum": 0,
+              "maximum": 100,
+              "type": "number"
+            }
+          },
+          {
+            "name": "maximumScore",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "minimum": 0,
+              "maximum": 100,
+              "type": "number"
+            }
+          },
+          {
+            "name": "dateFrom",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "dateTo",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "search",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "sortBy",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "default": "score",
+              "type": "string",
+              "enum": [
+                "score",
+                "createdAt",
+                "lastSignalAt",
+                "companyName"
+              ]
+            }
+          },
+          {
+            "name": "sortOrder",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "default": "desc",
+              "type": "string",
+              "enum": [
+                "asc",
+                "desc"
+              ]
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "List and filter workspace leads",
+        "tags": [
+          "leads"
+        ]
+      },
+      "post": {
+        "operationId": "LeadsController_create",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateLeadDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Create a manual or pre-qualified lead",
+        "tags": [
+          "leads"
+        ]
+      }
+    },
+    "/api/v1/leads/{id}": {
+      "get": {
+        "operationId": "LeadsController_get",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Get a lead with company, contact, signals, score, and activity",
+        "tags": [
+          "leads"
+        ]
+      },
+      "patch": {
+        "operationId": "LeadsController_update",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateLeadDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Update a lead",
+        "tags": [
+          "leads"
+        ]
+      },
+      "delete": {
+        "operationId": "LeadsController_delete",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Delete a lead",
+        "tags": [
+          "leads"
+        ]
+      }
+    },
+    "/api/v1/settings": {
+      "get": {
+        "operationId": "SettingsController_get",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Get editable workspace settings",
+        "tags": [
+          "settings"
+        ]
+      },
+      "patch": {
+        "operationId": "SettingsController_update",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateSettingsDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Update workspace settings",
+        "tags": [
+          "settings"
+        ]
+      }
+    }
+  },
+  "info": {
+    "title": "Scrapo Lead Hunter API",
+    "description": "Independent, workspace-scoped REST API for the Scrapo Lead Hunter clients.",
+    "version": "1.0",
+    "contact": {}
+  },
+  "tags": [],
+  "servers": [],
+  "components": {
+    "securitySchemes": {
+      "bearer": {
+        "scheme": "bearer",
+        "bearerFormat": "JWT",
+        "type": "http"
+      },
+      "workspace": {
+        "type": "apiKey",
+        "in": "header",
+        "name": "X-Workspace-Id"
+      }
+    },
+    "schemas": {
+      "CreateCompanyDto": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "example": "Northstar Digital"
+          },
+          "domain": {
+            "type": "string",
+            "example": "northstar.example"
+          },
+          "website": {
+            "type": "string",
+            "example": "https://northstar.example"
+          },
+          "description": {
+            "type": "string"
+          },
+          "country": {
+            "type": "string"
+          },
+          "city": {
+            "type": "string"
+          },
+          "employeeRange": {
+            "type": "string"
+          },
+          "companyType": {
+            "type": "string"
+          },
+          "agencyType": {
+            "type": "string"
+          },
+          "services": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "technologies": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "industries": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "hasWebService": {
+            "type": "boolean"
+          },
+          "hasBackendService": {
+            "type": "boolean"
+          },
+          "hasMobileService": {
+            "type": "boolean"
+          },
+          "partnershipFitScore": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 100
+          }
+        },
+        "required": [
+          "name"
+        ]
+      },
+      "UpdateCompanyDto": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "example": "Northstar Digital"
+          },
+          "domain": {
+            "type": "string",
+            "example": "northstar.example"
+          },
+          "website": {
+            "type": "string",
+            "example": "https://northstar.example"
+          },
+          "description": {
+            "type": "string"
+          },
+          "country": {
+            "type": "string"
+          },
+          "city": {
+            "type": "string"
+          },
+          "employeeRange": {
+            "type": "string"
+          },
+          "companyType": {
+            "type": "string"
+          },
+          "agencyType": {
+            "type": "string"
+          },
+          "services": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "technologies": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "industries": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "hasWebService": {
+            "type": "boolean"
+          },
+          "hasBackendService": {
+            "type": "boolean"
+          },
+          "hasMobileService": {
+            "type": "boolean"
+          },
+          "partnershipFitScore": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 100
+          }
+        }
+      },
+      "CreateContactDto": {
+        "type": "object",
+        "properties": {
+          "companyId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "fullName": {
+            "type": "string",
+            "example": "James Smith"
+          },
+          "role": {
+            "type": "string",
+            "example": "Founder"
+          },
+          "email": {
+            "type": "string",
+            "example": "james@example.com"
+          },
+          "emailStatus": {
+            "type": "string",
+            "enum": [
+              "UNKNOWN",
+              "GUESSED",
+              "UNVERIFIED",
+              "VERIFIED",
+              "INVALID",
+              "BOUNCED"
+            ]
+          },
+          "emailSource": {
+            "type": "string"
+          },
+          "linkedinUrl": {
+            "type": "string"
+          },
+          "xUrl": {
+            "type": "string"
+          },
+          "decisionMakerScore": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 100
+          },
+          "contactConfidence": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 100
+          }
+        },
+        "required": [
+          "fullName"
+        ]
+      },
+      "UpdateContactDto": {
+        "type": "object",
+        "properties": {
+          "companyId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "fullName": {
+            "type": "string",
+            "example": "James Smith"
+          },
+          "role": {
+            "type": "string",
+            "example": "Founder"
+          },
+          "email": {
+            "type": "string",
+            "example": "james@example.com"
+          },
+          "emailStatus": {
+            "type": "string",
+            "enum": [
+              "UNKNOWN",
+              "GUESSED",
+              "UNVERIFIED",
+              "VERIFIED",
+              "INVALID",
+              "BOUNCED"
+            ]
+          },
+          "emailSource": {
+            "type": "string"
+          },
+          "linkedinUrl": {
+            "type": "string"
+          },
+          "xUrl": {
+            "type": "string"
+          },
+          "decisionMakerScore": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 100
+          },
+          "contactConfidence": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 100
+          }
+        }
+      },
+      "CreateLeadDto": {
+        "type": "object",
+        "properties": {
+          "companyId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "contactId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "primarySource": {
+            "type": "string",
+            "enum": [
+              "X",
+              "REDDIT",
+              "TELEGRAM",
+              "WEB",
+              "AGENCY_DIRECTORY",
+              "MANUAL"
+            ],
+            "default": "MANUAL"
+          },
+          "leadType": {
+            "type": "string",
+            "enum": [
+              "AGENCY_PARTNER",
+              "ACTIVE_REQUIREMENT",
+              "BUSINESS_OPPORTUNITY",
+              "MANUAL"
+            ],
+            "default": "MANUAL"
+          },
+          "title": {
+            "type": "string",
+            "example": "Agency mobile delivery partnership"
+          },
+          "opportunitySummary": {
+            "type": "string"
+          },
+          "recommendedPitch": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "NEW",
+              "ANALYZING",
+              "QUALIFIED",
+              "SHORTLISTED",
+              "DRAFTED",
+              "APPROVED",
+              "CONTACTED",
+              "FOLLOW_UP",
+              "REPLIED",
+              "INTERESTED",
+              "MEETING",
+              "PROPOSAL",
+              "WON",
+              "LOST",
+              "NOT_INTERESTED",
+              "DO_NOT_CONTACT",
+              "INVALID"
+            ]
+          },
+          "overallScore": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 100,
+            "default": 0
+          }
+        },
+        "required": [
+          "primarySource",
+          "leadType",
+          "title"
+        ]
+      },
+      "UpdateLeadDto": {
+        "type": "object",
+        "properties": {
+          "companyId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "contactId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "primarySource": {
+            "type": "string",
+            "enum": [
+              "X",
+              "REDDIT",
+              "TELEGRAM",
+              "WEB",
+              "AGENCY_DIRECTORY",
+              "MANUAL"
+            ],
+            "default": "MANUAL"
+          },
+          "leadType": {
+            "type": "string",
+            "enum": [
+              "AGENCY_PARTNER",
+              "ACTIVE_REQUIREMENT",
+              "BUSINESS_OPPORTUNITY",
+              "MANUAL"
+            ],
+            "default": "MANUAL"
+          },
+          "title": {
+            "type": "string",
+            "example": "Agency mobile delivery partnership"
+          },
+          "opportunitySummary": {
+            "type": "string"
+          },
+          "recommendedPitch": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "NEW",
+              "ANALYZING",
+              "QUALIFIED",
+              "SHORTLISTED",
+              "DRAFTED",
+              "APPROVED",
+              "CONTACTED",
+              "FOLLOW_UP",
+              "REPLIED",
+              "INTERESTED",
+              "MEETING",
+              "PROPOSAL",
+              "WON",
+              "LOST",
+              "NOT_INTERESTED",
+              "DO_NOT_CONTACT",
+              "INVALID"
+            ]
+          },
+          "overallScore": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 100,
+            "default": 0
+          },
+          "temperature": {
+            "type": "string",
+            "enum": [
+              "HOT",
+              "STRONG",
+              "REVIEW",
+              "WEAK",
+              "REJECT"
+            ]
+          }
+        }
+      },
+      "ProfileSettingsDto": {
+        "type": "object",
+        "properties": {}
+      },
+      "TargetingSettingsDto": {
+        "type": "object",
+        "properties": {}
+      },
+      "DiscoverySettingsDto": {
+        "type": "object",
+        "properties": {}
+      },
+      "UpdateSettingsDto": {
+        "type": "object",
+        "properties": {
+          "profile": {
+            "$ref": "#/components/schemas/ProfileSettingsDto"
+          },
+          "targeting": {
+            "$ref": "#/components/schemas/TargetingSettingsDto"
+          },
+          "scoring": {
+            "type": "object",
+            "description": "Eight scoring weights that must total 100."
+          },
+          "discovery": {
+            "$ref": "#/components/schemas/DiscoverySettingsDto"
+          },
+          "outreachPaused": {
+            "type": "boolean"
+          },
+          "emailMode": {
+            "type": "string",
+            "enum": [
+              "DRAFT_FIRST",
+              "APPROVE_AND_SEND",
+              "AUTOMATIC"
+            ]
+          },
+          "weeklyEmailLimit": {
+            "type": "number"
+          },
+          "followUpDelayDays": {
+            "type": "number"
+          },
+          "maxFollowUps": {
+            "type": "number"
+          },
+          "emailSignature": {
+            "type": "string"
+          }
+        }
+      }
+    }
+  }
+}

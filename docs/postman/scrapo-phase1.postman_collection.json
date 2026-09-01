@@ -1,0 +1,59 @@
+{
+  "info": {
+    "name": "Scrapo Lead Hunter — Phase 1",
+    "description": "Authenticated Phase 1 REST endpoints. Set accessToken to a Supabase access token, or use demo-token only when the API is running with DEMO_AUTH_ENABLED=true outside production.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    { "key": "baseUrl", "value": "http://localhost:4000/api/v1" },
+    { "key": "accessToken", "value": "demo-token", "type": "secret" },
+    { "key": "companyId", "value": "" },
+    { "key": "contactId", "value": "" },
+    { "key": "leadId", "value": "" }
+  ],
+  "auth": {
+    "type": "bearer",
+    "bearer": [{ "key": "token", "value": "{{accessToken}}", "type": "string" }]
+  },
+  "item": [
+    {
+      "name": "System",
+      "item": [
+        { "name": "Health", "auth": { "type": "noauth" }, "request": { "method": "GET", "url": "{{baseUrl}}/health" } },
+        { "name": "Dashboard", "request": { "method": "GET", "url": "{{baseUrl}}/dashboard" } },
+        { "name": "Get Settings", "request": { "method": "GET", "url": "{{baseUrl}}/settings" } },
+        { "name": "Update Settings", "request": { "method": "PATCH", "header": [{ "key": "Content-Type", "value": "application/json" }], "body": { "mode": "raw", "raw": "{\n  \"outreachPaused\": false,\n  \"weeklyEmailLimit\": 20\n}" }, "url": "{{baseUrl}}/settings" } }
+      ]
+    },
+    {
+      "name": "Companies",
+      "item": [
+        { "name": "List Companies", "request": { "method": "GET", "url": "{{baseUrl}}/companies?page=1&limit=20" } },
+        { "name": "Create Company", "request": { "method": "POST", "header": [{ "key": "Content-Type", "value": "application/json" }], "body": { "mode": "raw", "raw": "{\n  \"name\": \"Example Studio\",\n  \"website\": \"https://example.com\",\n  \"country\": \"United Kingdom\"\n}" }, "url": "{{baseUrl}}/companies" } },
+        { "name": "Get Company", "request": { "method": "GET", "url": "{{baseUrl}}/companies/{{companyId}}" } },
+        { "name": "Update Company", "request": { "method": "PATCH", "header": [{ "key": "Content-Type", "value": "application/json" }], "body": { "mode": "raw", "raw": "{\n  \"city\": \"London\"\n}" }, "url": "{{baseUrl}}/companies/{{companyId}}" } },
+        { "name": "Delete Company", "request": { "method": "DELETE", "url": "{{baseUrl}}/companies/{{companyId}}" } }
+      ]
+    },
+    {
+      "name": "Contacts",
+      "item": [
+        { "name": "List Contacts", "request": { "method": "GET", "url": "{{baseUrl}}/contacts?page=1&limit=20" } },
+        { "name": "Create Contact", "request": { "method": "POST", "header": [{ "key": "Content-Type", "value": "application/json" }], "body": { "mode": "raw", "raw": "{\n  \"companyId\": \"{{companyId}}\",\n  \"fullName\": \"Jane Founder\",\n  \"role\": \"Founder\",\n  \"email\": \"jane@example.com\",\n  \"emailStatus\": \"UNVERIFIED\"\n}" }, "url": "{{baseUrl}}/contacts" } },
+        { "name": "Get Contact", "request": { "method": "GET", "url": "{{baseUrl}}/contacts/{{contactId}}" } },
+        { "name": "Update Contact", "request": { "method": "PATCH", "header": [{ "key": "Content-Type", "value": "application/json" }], "body": { "mode": "raw", "raw": "{\n  \"decisionMakerScore\": 90\n}" }, "url": "{{baseUrl}}/contacts/{{contactId}}" } },
+        { "name": "Delete Contact", "request": { "method": "DELETE", "url": "{{baseUrl}}/contacts/{{contactId}}" } }
+      ]
+    },
+    {
+      "name": "Leads",
+      "item": [
+        { "name": "List Leads", "request": { "method": "GET", "url": "{{baseUrl}}/leads?page=1&limit=20&minimumScore=80&sortBy=score&sortOrder=desc" } },
+        { "name": "Create Lead", "request": { "method": "POST", "header": [{ "key": "Content-Type", "value": "application/json" }], "body": { "mode": "raw", "raw": "{\n  \"companyId\": \"{{companyId}}\",\n  \"contactId\": \"{{contactId}}\",\n  \"title\": \"Manual mobile opportunity\",\n  \"primarySource\": \"MANUAL\",\n  \"leadType\": \"MANUAL\",\n  \"overallScore\": 75\n}" }, "url": "{{baseUrl}}/leads" } },
+        { "name": "Get Lead", "request": { "method": "GET", "url": "{{baseUrl}}/leads/{{leadId}}" } },
+        { "name": "Update Lead", "request": { "method": "PATCH", "header": [{ "key": "Content-Type", "value": "application/json" }], "body": { "mode": "raw", "raw": "{\n  \"status\": \"QUALIFIED\",\n  \"overallScore\": 84\n}" }, "url": "{{baseUrl}}/leads/{{leadId}}" } },
+        { "name": "Delete Lead", "request": { "method": "DELETE", "url": "{{baseUrl}}/leads/{{leadId}}" } }
+      ]
+    }
+  ]
+}

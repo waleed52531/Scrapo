@@ -1,0 +1,29 @@
+{
+  "name": "@scrapo/worker",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "dev": "tsx watch src/main.ts",
+    "start": "node dist/main.js",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "lint": "eslint src --max-warnings=0",
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "@prisma/client": "6.19.0",
+    "@scrapo/database": "workspace:*",
+    "bullmq": "6.3.4",
+    "dotenv": "^17.2.2",
+    "ioredis": "^5.7.0"
+  },
+  "devDependencies": {
+    "@scrapo/eslint-config": "workspace:*",
+    "@types/node": "^24.3.1",
+    "eslint": "^9.35.0",
+    "tsx": "^4.20.5",
+    "typescript": "6.0.3",
+    "vitest": "^3.2.4"
+  }
+}
