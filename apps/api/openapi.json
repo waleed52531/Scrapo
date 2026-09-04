@@ -16,6 +16,26 @@
         ]
       }
     },
+    "/api/v1/analysis/website": {
+      "post": {
+        "operationId": "AnalysisController_analyzeWebsite",
+        "parameters": [],
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Analyze a public company website with SSRF protection",
+        "tags": [
+          "analysis"
+        ]
+      }
+    },
     "/api/v1/dashboard": {
       "get": {
         "operationId": "DashboardController_get",
@@ -39,53 +59,7 @@
     "/api/v1/companies": {
       "get": {
         "operationId": "CompaniesController_list",
-        "parameters": [
-          {
-            "name": "page",
-            "required": false,
-            "in": "query",
-            "schema": {
-              "minimum": 1,
-              "default": 1,
-              "type": "number"
-            }
-          },
-          {
-            "name": "limit",
-            "required": false,
-            "in": "query",
-            "schema": {
-              "minimum": 1,
-              "maximum": 100,
-              "default": 20,
-              "type": "number"
-            }
-          },
-          {
-            "name": "search",
-            "required": false,
-            "in": "query",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "country",
-            "required": false,
-            "in": "query",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "hasMobileService",
-            "required": false,
-            "in": "query",
-            "schema": {
-              "type": "boolean"
-            }
-          }
-        ],
+        "parameters": [],
         "responses": {
           "200": {
             "description": ""
@@ -104,16 +78,6 @@
       "post": {
         "operationId": "CompaniesController_create",
         "parameters": [],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/CreateCompanyDto"
-              }
-            }
-          }
-        },
         "responses": {
           "201": {
             "description": ""
@@ -133,16 +97,7 @@
     "/api/v1/companies/{id}": {
       "get": {
         "operationId": "CompaniesController_get",
-        "parameters": [
-          {
-            "name": "id",
-            "required": true,
-            "in": "path",
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
+        "parameters": [],
         "responses": {
           "200": {
             "description": ""
@@ -160,26 +115,7 @@
       },
       "patch": {
         "operationId": "CompaniesController_update",
-        "parameters": [
-          {
-            "name": "id",
-            "required": true,
-            "in": "path",
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/UpdateCompanyDto"
-              }
-            }
-          }
-        },
+        "parameters": [],
         "responses": {
           "200": {
             "description": ""
@@ -197,16 +133,7 @@
       },
       "delete": {
         "operationId": "CompaniesController_delete",
-        "parameters": [
-          {
-            "name": "id",
-            "required": true,
-            "in": "path",
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
+        "parameters": [],
         "responses": {
           "200": {
             "description": ""
@@ -223,65 +150,30 @@
         ]
       }
     },
+    "/api/v1/companies/{id}/analyze": {
+      "post": {
+        "operationId": "CompaniesController_analyze",
+        "parameters": [],
+        "responses": {
+          "202": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Queue analysis for a company website and public profile",
+        "tags": [
+          "companies"
+        ]
+      }
+    },
     "/api/v1/contacts": {
       "get": {
         "operationId": "ContactsController_list",
-        "parameters": [
-          {
-            "name": "page",
-            "required": false,
-            "in": "query",
-            "schema": {
-              "minimum": 1,
-              "default": 1,
-              "type": "number"
-            }
-          },
-          {
-            "name": "limit",
-            "required": false,
-            "in": "query",
-            "schema": {
-              "minimum": 1,
-              "maximum": 100,
-              "default": 20,
-              "type": "number"
-            }
-          },
-          {
-            "name": "search",
-            "required": false,
-            "in": "query",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "companyId",
-            "required": false,
-            "in": "query",
-            "schema": {
-              "format": "uuid",
-              "type": "string"
-            }
-          },
-          {
-            "name": "emailStatus",
-            "required": false,
-            "in": "query",
-            "schema": {
-              "type": "string",
-              "enum": [
-                "UNKNOWN",
-                "GUESSED",
-                "UNVERIFIED",
-                "VERIFIED",
-                "INVALID",
-                "BOUNCED"
-              ]
-            }
-          }
-        ],
+        "parameters": [],
         "responses": {
           "200": {
             "description": ""
@@ -300,16 +192,6 @@
       "post": {
         "operationId": "ContactsController_create",
         "parameters": [],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/CreateContactDto"
-              }
-            }
-          }
-        },
         "responses": {
           "201": {
             "description": ""
@@ -329,16 +211,7 @@
     "/api/v1/contacts/{id}": {
       "get": {
         "operationId": "ContactsController_get",
-        "parameters": [
-          {
-            "name": "id",
-            "required": true,
-            "in": "path",
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
+        "parameters": [],
         "responses": {
           "200": {
             "description": ""
@@ -356,26 +229,7 @@
       },
       "patch": {
         "operationId": "ContactsController_update",
-        "parameters": [
-          {
-            "name": "id",
-            "required": true,
-            "in": "path",
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/UpdateContactDto"
-              }
-            }
-          }
-        },
+        "parameters": [],
         "responses": {
           "200": {
             "description": ""
@@ -393,16 +247,7 @@
       },
       "delete": {
         "operationId": "ContactsController_delete",
-        "parameters": [
-          {
-            "name": "id",
-            "required": true,
-            "in": "path",
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
+        "parameters": [],
         "responses": {
           "200": {
             "description": ""
@@ -422,189 +267,7 @@
     "/api/v1/leads": {
       "get": {
         "operationId": "LeadsController_list",
-        "parameters": [
-          {
-            "name": "page",
-            "required": false,
-            "in": "query",
-            "schema": {
-              "minimum": 1,
-              "default": 1,
-              "type": "number"
-            }
-          },
-          {
-            "name": "limit",
-            "required": false,
-            "in": "query",
-            "schema": {
-              "minimum": 1,
-              "maximum": 100,
-              "default": 20,
-              "type": "number"
-            }
-          },
-          {
-            "name": "status",
-            "required": false,
-            "in": "query",
-            "schema": {
-              "type": "string",
-              "enum": [
-                "NEW",
-                "ANALYZING",
-                "QUALIFIED",
-                "SHORTLISTED",
-                "DRAFTED",
-                "APPROVED",
-                "CONTACTED",
-                "FOLLOW_UP",
-                "REPLIED",
-                "INTERESTED",
-                "MEETING",
-                "PROPOSAL",
-                "WON",
-                "LOST",
-                "NOT_INTERESTED",
-                "DO_NOT_CONTACT",
-                "INVALID"
-              ]
-            }
-          },
-          {
-            "name": "temperature",
-            "required": false,
-            "in": "query",
-            "schema": {
-              "type": "string",
-              "enum": [
-                "HOT",
-                "STRONG",
-                "REVIEW",
-                "WEAK",
-                "REJECT"
-              ]
-            }
-          },
-          {
-            "name": "source",
-            "required": false,
-            "in": "query",
-            "schema": {
-              "type": "string",
-              "enum": [
-                "X",
-                "REDDIT",
-                "TELEGRAM",
-                "WEB",
-                "AGENCY_DIRECTORY",
-                "MANUAL"
-              ]
-            }
-          },
-          {
-            "name": "leadType",
-            "required": false,
-            "in": "query",
-            "schema": {
-              "type": "string",
-              "enum": [
-                "AGENCY_PARTNER",
-                "ACTIVE_REQUIREMENT",
-                "BUSINESS_OPPORTUNITY",
-                "MANUAL"
-              ]
-            }
-          },
-          {
-            "name": "country",
-            "required": false,
-            "in": "query",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "company",
-            "required": false,
-            "in": "query",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "minimumScore",
-            "required": false,
-            "in": "query",
-            "schema": {
-              "minimum": 0,
-              "maximum": 100,
-              "type": "number"
-            }
-          },
-          {
-            "name": "maximumScore",
-            "required": false,
-            "in": "query",
-            "schema": {
-              "minimum": 0,
-              "maximum": 100,
-              "type": "number"
-            }
-          },
-          {
-            "name": "dateFrom",
-            "required": false,
-            "in": "query",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "dateTo",
-            "required": false,
-            "in": "query",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "search",
-            "required": false,
-            "in": "query",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "sortBy",
-            "required": false,
-            "in": "query",
-            "schema": {
-              "default": "score",
-              "type": "string",
-              "enum": [
-                "score",
-                "createdAt",
-                "lastSignalAt",
-                "companyName"
-              ]
-            }
-          },
-          {
-            "name": "sortOrder",
-            "required": false,
-            "in": "query",
-            "schema": {
-              "default": "desc",
-              "type": "string",
-              "enum": [
-                "asc",
-                "desc"
-              ]
-            }
-          }
-        ],
+        "parameters": [],
         "responses": {
           "200": {
             "description": ""
@@ -623,16 +286,6 @@
       "post": {
         "operationId": "LeadsController_create",
         "parameters": [],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/CreateLeadDto"
-              }
-            }
-          }
-        },
         "responses": {
           "201": {
             "description": ""
@@ -652,16 +305,7 @@
     "/api/v1/leads/{id}": {
       "get": {
         "operationId": "LeadsController_get",
-        "parameters": [
-          {
-            "name": "id",
-            "required": true,
-            "in": "path",
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
+        "parameters": [],
         "responses": {
           "200": {
             "description": ""
@@ -679,26 +323,7 @@
       },
       "patch": {
         "operationId": "LeadsController_update",
-        "parameters": [
-          {
-            "name": "id",
-            "required": true,
-            "in": "path",
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/UpdateLeadDto"
-              }
-            }
-          }
-        },
+        "parameters": [],
         "responses": {
           "200": {
             "description": ""
@@ -716,16 +341,7 @@
       },
       "delete": {
         "operationId": "LeadsController_delete",
-        "parameters": [
-          {
-            "name": "id",
-            "required": true,
-            "in": "path",
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
+        "parameters": [],
         "responses": {
           "200": {
             "description": ""
@@ -739,6 +355,126 @@
         "summary": "Delete a lead",
         "tags": [
           "leads"
+        ]
+      }
+    },
+    "/api/v1/leads/{id}/scores": {
+      "get": {
+        "operationId": "LeadsController_scores",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Get score history for a lead",
+        "tags": [
+          "leads"
+        ]
+      }
+    },
+    "/api/v1/leads/{id}/analyze": {
+      "post": {
+        "operationId": "LeadsController_analyze",
+        "parameters": [],
+        "responses": {
+          "202": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Queue AI/manual lead analysis",
+        "tags": [
+          "leads"
+        ]
+      }
+    },
+    "/api/v1/leads/{id}/rescore": {
+      "post": {
+        "operationId": "LeadsController_rescore",
+        "parameters": [],
+        "responses": {
+          "202": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Queue a lead rescore using current settings",
+        "tags": [
+          "leads"
+        ]
+      }
+    },
+    "/api/v1/leads/{id}/score-override": {
+      "post": {
+        "operationId": "LeadsController_overrideScore",
+        "parameters": [],
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Manually override the latest visible lead score without deleting history",
+        "tags": [
+          "leads"
+        ]
+      }
+    },
+    "/api/v1/jobs": {
+      "get": {
+        "operationId": "JobsController_list",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "List workspace system jobs",
+        "tags": [
+          "jobs"
+        ]
+      }
+    },
+    "/api/v1/jobs/{id}": {
+      "get": {
+        "operationId": "JobsController_get",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Get a workspace system job",
+        "tags": [
+          "jobs"
         ]
       }
     },
@@ -764,16 +500,6 @@
       "patch": {
         "operationId": "SettingsController_update",
         "parameters": [],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/UpdateSettingsDto"
-              }
-            }
-          }
-        },
         "responses": {
           "200": {
             "description": ""
@@ -785,6 +511,64 @@
           }
         ],
         "summary": "Update workspace settings",
+        "tags": [
+          "settings"
+        ]
+      }
+    },
+    "/api/v1/settings/scoring": {
+      "get": {
+        "operationId": "SettingsController_getScoring",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Get deterministic lead scoring weights",
+        "tags": [
+          "settings"
+        ]
+      },
+      "patch": {
+        "operationId": "SettingsController_updateScoring",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Update deterministic lead scoring weights",
+        "tags": [
+          "settings"
+        ]
+      }
+    },
+    "/api/v1/settings/ai": {
+      "get": {
+        "operationId": "SettingsController_getAiStatus",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Get OpenAI configuration status without exposing secrets",
         "tags": [
           "settings"
         ]
@@ -812,463 +596,6 @@
         "name": "X-Workspace-Id"
       }
     },
-    "schemas": {
-      "CreateCompanyDto": {
-        "type": "object",
-        "properties": {
-          "name": {
-            "type": "string",
-            "example": "Northstar Digital"
-          },
-          "domain": {
-            "type": "string",
-            "example": "northstar.example"
-          },
-          "website": {
-            "type": "string",
-            "example": "https://northstar.example"
-          },
-          "description": {
-            "type": "string"
-          },
-          "country": {
-            "type": "string"
-          },
-          "city": {
-            "type": "string"
-          },
-          "employeeRange": {
-            "type": "string"
-          },
-          "companyType": {
-            "type": "string"
-          },
-          "agencyType": {
-            "type": "string"
-          },
-          "services": {
-            "type": "array",
-            "items": {
-              "type": "string"
-            }
-          },
-          "technologies": {
-            "type": "array",
-            "items": {
-              "type": "string"
-            }
-          },
-          "industries": {
-            "type": "array",
-            "items": {
-              "type": "string"
-            }
-          },
-          "hasWebService": {
-            "type": "boolean"
-          },
-          "hasBackendService": {
-            "type": "boolean"
-          },
-          "hasMobileService": {
-            "type": "boolean"
-          },
-          "partnershipFitScore": {
-            "type": "number",
-            "minimum": 0,
-            "maximum": 100
-          }
-        },
-        "required": [
-          "name"
-        ]
-      },
-      "UpdateCompanyDto": {
-        "type": "object",
-        "properties": {
-          "name": {
-            "type": "string",
-            "example": "Northstar Digital"
-          },
-          "domain": {
-            "type": "string",
-            "example": "northstar.example"
-          },
-          "website": {
-            "type": "string",
-            "example": "https://northstar.example"
-          },
-          "description": {
-            "type": "string"
-          },
-          "country": {
-            "type": "string"
-          },
-          "city": {
-            "type": "string"
-          },
-          "employeeRange": {
-            "type": "string"
-          },
-          "companyType": {
-            "type": "string"
-          },
-          "agencyType": {
-            "type": "string"
-          },
-          "services": {
-            "type": "array",
-            "items": {
-              "type": "string"
-            }
-          },
-          "technologies": {
-            "type": "array",
-            "items": {
-              "type": "string"
-            }
-          },
-          "industries": {
-            "type": "array",
-            "items": {
-              "type": "string"
-            }
-          },
-          "hasWebService": {
-            "type": "boolean"
-          },
-          "hasBackendService": {
-            "type": "boolean"
-          },
-          "hasMobileService": {
-            "type": "boolean"
-          },
-          "partnershipFitScore": {
-            "type": "number",
-            "minimum": 0,
-            "maximum": 100
-          }
-        }
-      },
-      "CreateContactDto": {
-        "type": "object",
-        "properties": {
-          "companyId": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "fullName": {
-            "type": "string",
-            "example": "James Smith"
-          },
-          "role": {
-            "type": "string",
-            "example": "Founder"
-          },
-          "email": {
-            "type": "string",
-            "example": "james@example.com"
-          },
-          "emailStatus": {
-            "type": "string",
-            "enum": [
-              "UNKNOWN",
-              "GUESSED",
-              "UNVERIFIED",
-              "VERIFIED",
-              "INVALID",
-              "BOUNCED"
-            ]
-          },
-          "emailSource": {
-            "type": "string"
-          },
-          "linkedinUrl": {
-            "type": "string"
-          },
-          "xUrl": {
-            "type": "string"
-          },
-          "decisionMakerScore": {
-            "type": "number",
-            "minimum": 0,
-            "maximum": 100
-          },
-          "contactConfidence": {
-            "type": "number",
-            "minimum": 0,
-            "maximum": 100
-          }
-        },
-        "required": [
-          "fullName"
-        ]
-      },
-      "UpdateContactDto": {
-        "type": "object",
-        "properties": {
-          "companyId": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "fullName": {
-            "type": "string",
-            "example": "James Smith"
-          },
-          "role": {
-            "type": "string",
-            "example": "Founder"
-          },
-          "email": {
-            "type": "string",
-            "example": "james@example.com"
-          },
-          "emailStatus": {
-            "type": "string",
-            "enum": [
-              "UNKNOWN",
-              "GUESSED",
-              "UNVERIFIED",
-              "VERIFIED",
-              "INVALID",
-              "BOUNCED"
-            ]
-          },
-          "emailSource": {
-            "type": "string"
-          },
-          "linkedinUrl": {
-            "type": "string"
-          },
-          "xUrl": {
-            "type": "string"
-          },
-          "decisionMakerScore": {
-            "type": "number",
-            "minimum": 0,
-            "maximum": 100
-          },
-          "contactConfidence": {
-            "type": "number",
-            "minimum": 0,
-            "maximum": 100
-          }
-        }
-      },
-      "CreateLeadDto": {
-        "type": "object",
-        "properties": {
-          "companyId": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "contactId": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "primarySource": {
-            "type": "string",
-            "enum": [
-              "X",
-              "REDDIT",
-              "TELEGRAM",
-              "WEB",
-              "AGENCY_DIRECTORY",
-              "MANUAL"
-            ],
-            "default": "MANUAL"
-          },
-          "leadType": {
-            "type": "string",
-            "enum": [
-              "AGENCY_PARTNER",
-              "ACTIVE_REQUIREMENT",
-              "BUSINESS_OPPORTUNITY",
-              "MANUAL"
-            ],
-            "default": "MANUAL"
-          },
-          "title": {
-            "type": "string",
-            "example": "Agency mobile delivery partnership"
-          },
-          "opportunitySummary": {
-            "type": "string"
-          },
-          "recommendedPitch": {
-            "type": "string"
-          },
-          "status": {
-            "type": "string",
-            "enum": [
-              "NEW",
-              "ANALYZING",
-              "QUALIFIED",
-              "SHORTLISTED",
-              "DRAFTED",
-              "APPROVED",
-              "CONTACTED",
-              "FOLLOW_UP",
-              "REPLIED",
-              "INTERESTED",
-              "MEETING",
-              "PROPOSAL",
-              "WON",
-              "LOST",
-              "NOT_INTERESTED",
-              "DO_NOT_CONTACT",
-              "INVALID"
-            ]
-          },
-          "overallScore": {
-            "type": "number",
-            "minimum": 0,
-            "maximum": 100,
-            "default": 0
-          }
-        },
-        "required": [
-          "primarySource",
-          "leadType",
-          "title"
-        ]
-      },
-      "UpdateLeadDto": {
-        "type": "object",
-        "properties": {
-          "companyId": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "contactId": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "primarySource": {
-            "type": "string",
-            "enum": [
-              "X",
-              "REDDIT",
-              "TELEGRAM",
-              "WEB",
-              "AGENCY_DIRECTORY",
-              "MANUAL"
-            ],
-            "default": "MANUAL"
-          },
-          "leadType": {
-            "type": "string",
-            "enum": [
-              "AGENCY_PARTNER",
-              "ACTIVE_REQUIREMENT",
-              "BUSINESS_OPPORTUNITY",
-              "MANUAL"
-            ],
-            "default": "MANUAL"
-          },
-          "title": {
-            "type": "string",
-            "example": "Agency mobile delivery partnership"
-          },
-          "opportunitySummary": {
-            "type": "string"
-          },
-          "recommendedPitch": {
-            "type": "string"
-          },
-          "status": {
-            "type": "string",
-            "enum": [
-              "NEW",
-              "ANALYZING",
-              "QUALIFIED",
-              "SHORTLISTED",
-              "DRAFTED",
-              "APPROVED",
-              "CONTACTED",
-              "FOLLOW_UP",
-              "REPLIED",
-              "INTERESTED",
-              "MEETING",
-              "PROPOSAL",
-              "WON",
-              "LOST",
-              "NOT_INTERESTED",
-              "DO_NOT_CONTACT",
-              "INVALID"
-            ]
-          },
-          "overallScore": {
-            "type": "number",
-            "minimum": 0,
-            "maximum": 100,
-            "default": 0
-          },
-          "temperature": {
-            "type": "string",
-            "enum": [
-              "HOT",
-              "STRONG",
-              "REVIEW",
-              "WEAK",
-              "REJECT"
-            ]
-          }
-        }
-      },
-      "ProfileSettingsDto": {
-        "type": "object",
-        "properties": {}
-      },
-      "TargetingSettingsDto": {
-        "type": "object",
-        "properties": {}
-      },
-      "DiscoverySettingsDto": {
-        "type": "object",
-        "properties": {}
-      },
-      "UpdateSettingsDto": {
-        "type": "object",
-        "properties": {
-          "profile": {
-            "$ref": "#/components/schemas/ProfileSettingsDto"
-          },
-          "targeting": {
-            "$ref": "#/components/schemas/TargetingSettingsDto"
-          },
-          "scoring": {
-            "type": "object",
-            "description": "Eight scoring weights that must total 100."
-          },
-          "discovery": {
-            "$ref": "#/components/schemas/DiscoverySettingsDto"
-          },
-          "outreachPaused": {
-            "type": "boolean"
-          },
-          "emailMode": {
-            "type": "string",
-            "enum": [
-              "DRAFT_FIRST",
-              "APPROVE_AND_SEND",
-              "AUTOMATIC"
-            ]
-          },
-          "weeklyEmailLimit": {
-            "type": "number"
-          },
-          "followUpDelayDays": {
-            "type": "number"
-          },
-          "maxFollowUps": {
-            "type": "number"
-          },
-          "emailSignature": {
-            "type": "string"
-          }
-        }
-      }
-    }
+    "schemas": {}
   }
 }

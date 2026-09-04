@@ -19,6 +19,8 @@ enum LeadSource {
   TELEGRAM
   WEB
   AGENCY_DIRECTORY
+  LINKEDIN
+  OTHER
   MANUAL
 }
 
@@ -26,7 +28,14 @@ enum LeadType {
   AGENCY_PARTNER
   ACTIVE_REQUIREMENT
   BUSINESS_OPPORTUNITY
+  MVP_STARTUP
+  EXISTING_APP_FIX
+  FIREBASE_API_SUPPORT
+  APP_STORE_SUPPORT
+  GENERAL_MOBILE_SUPPORT
   MANUAL
+  INVALID
+  OTHER
 }
 
 enum LeadStatus {
@@ -55,6 +64,49 @@ enum LeadTemperature {
   REVIEW
   WEAK
   REJECT
+}
+
+enum AnalysisStatus {
+  NOT_ANALYZED
+  QUEUED
+  ANALYZING
+  COMPLETED
+  FAILED
+}
+
+enum OutreachRecommendation {
+  AGENCY_PARTNERSHIP
+  ACTIVE_REQUIREMENT
+  MVP_STARTUP
+  EXISTING_APP_FIX
+  FIREBASE_API_SUPPORT
+  APP_STORE_SUPPORT
+  GENERAL_MOBILE_SUPPORT
+  DO_NOT_CONTACT
+}
+
+enum RecommendedChannel {
+  EMAIL
+  X_REPLY
+  X_DM
+  REDDIT_REPLY
+  TELEGRAM_REPLY
+  LINKEDIN_CONNECT
+  MANUAL_RESEARCH
+  NONE
+}
+
+enum InvalidLeadReason {
+  OTHER_FREELANCER
+  SPAM
+  STUDENT_PROJECT
+  PERMANENT_JOB_ONLY
+  IRRELEVANT
+  TUTORIAL
+  JOB_AGGREGATOR
+  COMPETITOR
+  EXPIRED
+  INSUFFICIENT_INFORMATION
 }
 
 enum EmailStatus {
@@ -152,6 +204,7 @@ model Workspace {
   statistics   SourceStatistic[]
   integrations IntegrationConnection[]
   jobs         SystemJob[]
+  aiUsage      AiUsageLog[]
   automations  AutomationRule[]
   auditLogs    AuditLog[]
   settings     UserSettings?
@@ -175,35 +228,42 @@ model WorkspaceMember {
 }
 
 model Company {
-  id                         String    @id @default(uuid()) @db.Uuid
-  workspaceId                String    @map("workspace_id") @db.Uuid
+  id                         String         @id @default(uuid()) @db.Uuid
+  workspaceId                String         @map("workspace_id") @db.Uuid
   name                       String
-  normalizedName             String    @map("normalized_name")
+  normalizedName             String         @map("normalized_name")
   domain                     String?
   website                    String?
   description                String?
   country                    String?
   city                       String?
-  employeeRange              String?   @map("employee_range")
-  companyType                String?   @map("company_type")
-  agencyType                 String?   @map("agency_type")
-  services                   Json      @default("[]")
-  technologies               Json      @default("[]")
-  industries                 Json      @default("[]")
-  hasWebService              Boolean   @default(false) @map("has_web_service")
-  hasBackendService          Boolean   @default(false) @map("has_backend_service")
-  hasMobileService           Boolean   @default(false) @map("has_mobile_service")
-  hasFlutterService          Boolean   @default(false) @map("has_flutter_service")
-  hasAndroidService          Boolean   @default(false) @map("has_android_service")
-  hasIosService              Boolean   @default(false) @map("has_ios_service")
-  mobileCapabilityConfidence Int       @default(0) @map("mobile_capability_confidence")
-  companyQualityScore        Int       @default(0) @map("company_quality_score")
-  partnershipFitScore        Int       @default(0) @map("partnership_fit_score")
-  firstDiscoveredAt          DateTime  @default(now()) @map("first_discovered_at")
-  lastAnalyzedAt             DateTime? @map("last_analyzed_at")
-  createdAt                  DateTime  @default(now()) @map("created_at")
-  updatedAt                  DateTime  @updatedAt @map("updated_at")
-  workspace                  Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  employeeRange              String?        @map("employee_range")
+  companyType                String?        @map("company_type")
+  agencyType                 String?        @map("agency_type")
+  services                   Json           @default("[]")
+  technologies               Json           @default("[]")
+  industries                 Json           @default("[]")
+  hasWebService              Boolean        @default(false) @map("has_web_service")
+  hasBackendService          Boolean        @default(false) @map("has_backend_service")
+  hasMobileService           Boolean        @default(false) @map("has_mobile_service")
+  hasFlutterService          Boolean        @default(false) @map("has_flutter_service")
+  hasAndroidService          Boolean        @default(false) @map("has_android_service")
+  hasIosService              Boolean        @default(false) @map("has_ios_service")
+  mobileCapabilityConfidence Int            @default(0) @map("mobile_capability_confidence")
+  companyQualityScore        Int            @default(0) @map("company_quality_score")
+  partnershipFitScore        Int            @default(0) @map("partnership_fit_score")
+  companyAnalysisConfidence  Int            @default(0) @map("company_analysis_confidence")
+  companyAnalysisSummary     String?        @map("company_analysis_summary")
+  analysisStatus             AnalysisStatus @default(NOT_ANALYZED) @map("analysis_status")
+  analyzedAt                 DateTime?      @map("analyzed_at")
+  contentHash                String?        @map("content_hash")
+  aiModel                    String?        @map("ai_model")
+  promptVersion              String?        @map("prompt_version")
+  firstDiscoveredAt          DateTime       @default(now()) @map("first_discovered_at")
+  lastAnalyzedAt             DateTime?      @map("last_analyzed_at")
+  createdAt                  DateTime       @default(now()) @map("created_at")
+  updatedAt                  DateTime       @updatedAt @map("updated_at")
+  workspace                  Workspace      @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
   contacts                   Contact[]
   leads                      Lead[]
 
@@ -263,30 +323,49 @@ model RawLead {
 }
 
 model Lead {
-  id                 String            @id @default(uuid()) @db.Uuid
-  workspaceId        String            @map("workspace_id") @db.Uuid
-  companyId          String?           @map("company_id") @db.Uuid
-  contactId          String?           @map("contact_id") @db.Uuid
-  primarySource      LeadSource        @default(MANUAL) @map("primary_source")
-  leadType           LeadType          @default(MANUAL) @map("lead_type")
-  title              String
-  opportunitySummary String?           @map("opportunity_summary")
-  recommendedPitch   String?           @map("recommended_pitch")
-  status             LeadStatus        @default(NEW)
-  temperature        LeadTemperature   @default(REVIEW)
-  overallScore       Int               @default(0) @map("overall_score")
-  firstDiscoveredAt  DateTime          @default(now()) @map("first_discovered_at")
-  lastSignalAt       DateTime          @default(now()) @map("last_signal_at")
-  createdAt          DateTime          @default(now()) @map("created_at")
-  updatedAt          DateTime          @updatedAt @map("updated_at")
-  workspace          Workspace         @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
-  company            Company?          @relation(fields: [companyId], references: [id], onDelete: SetNull)
-  contact            Contact?          @relation(fields: [contactId], references: [id], onDelete: SetNull)
-  signals            LeadSignal[]
-  scores             LeadScore[]
-  outreach           OutreachMessage[]
-  activities         Activity[]
-  actions            ActionItem[]
+  id                      String                  @id @default(uuid()) @db.Uuid
+  workspaceId             String                  @map("workspace_id") @db.Uuid
+  companyId               String?                 @map("company_id") @db.Uuid
+  contactId               String?                 @map("contact_id") @db.Uuid
+  primarySource           LeadSource              @default(MANUAL) @map("primary_source")
+  leadType                LeadType                @default(MANUAL) @map("lead_type")
+  title                   String
+  opportunitySummary      String?                 @map("opportunity_summary")
+  recommendedPitch        String?                 @map("recommended_pitch")
+  sourceUrl               String?                 @map("source_url")
+  sourceContent           String?                 @map("source_content")
+  publishedAt             DateTime?               @map("published_at")
+  analysisStatus          AnalysisStatus          @default(NOT_ANALYZED) @map("analysis_status")
+  analysisConfidence      Int                     @default(0) @map("analysis_confidence")
+  analysisSummary         String?                 @map("analysis_summary")
+  evidence                Json                    @default("{}")
+  aiInterpretation        Json                    @default("{}") @map("ai_interpretation")
+  unknowns                Json                    @default("[]")
+  invalidReason           InvalidLeadReason?      @map("invalid_reason")
+  outreachRecommendation  OutreachRecommendation? @map("outreach_recommendation")
+  recommendedChannel      RecommendedChannel?     @map("recommended_channel")
+  scoreOverrideOriginal   Int?                    @map("score_override_original")
+  scoreOverrideScore      Int?                    @map("score_override_score")
+  scoreOverrideReason     String?                 @map("score_override_reason")
+  scoreOverriddenByUserId String?                 @map("score_overridden_by_user_id") @db.Uuid
+  scoreOverriddenAt       DateTime?               @map("score_overridden_at")
+  aiModel                 String?                 @map("ai_model")
+  promptVersion           String?                 @map("prompt_version")
+  status                  LeadStatus              @default(NEW)
+  temperature             LeadTemperature         @default(REVIEW)
+  overallScore            Int                     @default(0) @map("overall_score")
+  firstDiscoveredAt       DateTime                @default(now()) @map("first_discovered_at")
+  lastSignalAt            DateTime                @default(now()) @map("last_signal_at")
+  createdAt               DateTime                @default(now()) @map("created_at")
+  updatedAt               DateTime                @updatedAt @map("updated_at")
+  workspace               Workspace               @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  company                 Company?                @relation(fields: [companyId], references: [id], onDelete: SetNull)
+  contact                 Contact?                @relation(fields: [contactId], references: [id], onDelete: SetNull)
+  signals                 LeadSignal[]
+  scores                  LeadScore[]
+  outreach                OutreachMessage[]
+  activities              Activity[]
+  actions                 ActionItem[]
 
   @@index([workspaceId, status])
   @@index([workspaceId, temperature])
@@ -316,23 +395,39 @@ model LeadSignal {
 }
 
 model LeadScore {
-  id                   String    @id @default(uuid()) @db.Uuid
-  workspaceId          String    @map("workspace_id") @db.Uuid
-  leadId               String    @map("lead_id") @db.Uuid
-  buyingIntent         Int       @default(0) @map("buying_intent")
-  mobileRelevance      Int       @default(0) @map("mobile_relevance")
-  agencyFit            Int       @default(0) @map("agency_fit")
-  decisionMakerQuality Int       @default(0) @map("decision_maker_quality")
-  contactability       Int       @default(0)
-  recency              Int       @default(0)
-  companyQuality       Int       @default(0) @map("company_quality")
-  countryPriority      Int       @default(0) @map("country_priority")
-  overall              Int
-  confidence           Int       @default(0)
-  explanation          String?
-  createdAt            DateTime  @default(now()) @map("created_at")
-  workspace            Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
-  lead                 Lead      @relation(fields: [leadId], references: [id], onDelete: Cascade)
+  id                    String              @id @default(uuid()) @db.Uuid
+  workspaceId           String              @map("workspace_id") @db.Uuid
+  leadId                String              @map("lead_id") @db.Uuid
+  buyingIntent          Int                 @default(0) @map("buying_intent")
+  mobileRelevance       Int                 @default(0) @map("mobile_relevance")
+  agencyFit             Int                 @default(0) @map("agency_fit")
+  decisionMakerQuality  Int                 @default(0) @map("decision_maker_quality")
+  contactability        Int                 @default(0)
+  recency               Int                 @default(0)
+  companyQuality        Int                 @default(0) @map("company_quality")
+  countryPriority       Int                 @default(0) @map("country_priority")
+  spamProbability       Int                 @default(0) @map("spam_probability")
+  competitorProbability Int                 @default(0) @map("competitor_probability")
+  baseScore             Int                 @default(0) @map("base_score")
+  penalty               Int                 @default(0)
+  overall               Int
+  temperature           LeadTemperature     @default(REVIEW)
+  reason                String?
+  recommendedChannel    RecommendedChannel? @map("recommended_channel")
+  recommendedPitch      String?             @map("recommended_pitch")
+  confidence            Int                 @default(0)
+  explanation           String?
+  aiModel               String?             @map("ai_model")
+  promptVersion         String?             @map("prompt_version")
+  isManualOverride      Boolean             @default(false) @map("is_manual_override")
+  overrideOriginalScore Int?                @map("override_original_score")
+  overrideScore         Int?                @map("override_score")
+  overrideReason        String?             @map("override_reason")
+  overrideByUserId      String?             @map("override_by_user_id") @db.Uuid
+  overriddenAt          DateTime?           @map("overridden_at")
+  createdAt             DateTime            @default(now()) @map("created_at")
+  workspace             Workspace           @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  lead                  Lead                @relation(fields: [leadId], references: [id], onDelete: Cascade)
 
   @@index([workspaceId, leadId])
   @@map("lead_scores")
@@ -577,6 +672,25 @@ model UserSettings {
   workspace         Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
 
   @@map("user_settings")
+}
+
+model AiUsageLog {
+  id            String    @id @default(uuid()) @db.Uuid
+  workspaceId   String    @map("workspace_id") @db.Uuid
+  feature       String
+  model         String
+  promptVersion String?   @map("prompt_version")
+  success       Boolean
+  latencyMs     Int?      @map("latency_ms")
+  inputTokens   Int?      @map("input_tokens")
+  outputTokens  Int?      @map("output_tokens")
+  estimatedCost Decimal?  @map("estimated_cost") @db.Decimal(12, 6)
+  error         String?
+  createdAt     DateTime  @default(now()) @map("created_at")
+  workspace     Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+
+  @@index([workspaceId, feature, createdAt])
+  @@map("ai_usage_logs")
 }
 
 model DeviceToken {

@@ -1,16 +1,31 @@
-import { ApiProperty, ApiPropertyOptional, PartialType } from '@nestjs/swagger';
-import { Type } from 'class-transformer';
-import { IsDateString, IsEnum, IsIn, IsInt, IsOptional, IsString, IsUUID, Max, Min } from 'class-validator';
-import { LeadSource, LeadStatus, LeadTemperature, LeadType } from '@prisma/client';
-import { PaginationDto } from '../../common/pagination.dto';
+import { ApiProperty, ApiPropertyOptional, PartialType } from "@nestjs/swagger";
+import { Type } from "class-transformer";
+import {
+  IsDateString,
+  IsEnum,
+  IsIn,
+  IsInt,
+  IsOptional,
+  IsString,
+  IsUUID,
+  Max,
+  Min,
+} from "class-validator";
+import {
+  LeadSource,
+  LeadStatus,
+  LeadTemperature,
+  LeadType,
+} from "@prisma/client";
+import { PaginationDto } from "../../common/pagination.dto";
 
 export class CreateLeadDto {
-  @ApiPropertyOptional({ format: 'uuid' })
+  @ApiPropertyOptional({ format: "uuid" })
   @IsOptional()
   @IsUUID()
   companyId?: string;
 
-  @ApiPropertyOptional({ format: 'uuid' })
+  @ApiPropertyOptional({ format: "uuid" })
   @IsOptional()
   @IsUUID()
   contactId?: string;
@@ -25,7 +40,7 @@ export class CreateLeadDto {
   @IsEnum(LeadType)
   leadType: LeadType = LeadType.MANUAL;
 
-  @ApiProperty({ example: 'Agency mobile delivery partnership' })
+  @ApiProperty({ example: "Agency mobile delivery partnership" })
   @IsString()
   title: string;
 
@@ -38,6 +53,23 @@ export class CreateLeadDto {
   @IsOptional()
   @IsString()
   recommendedPitch?: string;
+
+  @ApiPropertyOptional({ example: "https://x.com/example/status/1" })
+  @IsOptional()
+  @IsString()
+  sourceUrl?: string;
+
+  @ApiPropertyOptional({
+    example: "Looking for a Flutter developer to finish our app this month.",
+  })
+  @IsOptional()
+  @IsString()
+  sourceContent?: string;
+
+  @ApiPropertyOptional()
+  @IsOptional()
+  @IsDateString()
+  publishedAt?: string;
 
   @ApiPropertyOptional({ enum: LeadStatus })
   @IsOptional()
@@ -122,13 +154,16 @@ export class LeadQueryDto extends PaginationDto {
   @IsString()
   search?: string;
 
-  @ApiPropertyOptional({ enum: ['score', 'createdAt', 'lastSignalAt', 'companyName'], default: 'score' })
+  @ApiPropertyOptional({
+    enum: ["score", "createdAt", "lastSignalAt", "companyName"],
+    default: "score",
+  })
   @IsOptional()
-  @IsIn(['score', 'createdAt', 'lastSignalAt', 'companyName'])
-  sortBy: 'score' | 'createdAt' | 'lastSignalAt' | 'companyName' = 'score';
+  @IsIn(["score", "createdAt", "lastSignalAt", "companyName"])
+  sortBy: "score" | "createdAt" | "lastSignalAt" | "companyName" = "score";
 
-  @ApiPropertyOptional({ enum: ['asc', 'desc'], default: 'desc' })
+  @ApiPropertyOptional({ enum: ["asc", "desc"], default: "desc" })
   @IsOptional()
-  @IsIn(['asc', 'desc'])
-  sortOrder: 'asc' | 'desc' = 'desc';
+  @IsIn(["asc", "desc"])
+  sortOrder: "asc" | "desc" = "desc";
 }

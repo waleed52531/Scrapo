@@ -1,10 +1,10 @@
 # Scrapo Lead Hunter
 
-Phase 1 of a desktop-first freelance lead intelligence product. This repository establishes the production architecture and a usable CRM foundation without implementing discovery, AI, enrichment, Gmail, or automated outreach.
+Phase 2 of a desktop-first freelance lead intelligence product. The repository now supports manual company/opportunity analysis, explainable lead scoring, score history, review workflows, and OpenAI-backed classification when configured.
 
 The web application is only a client. All business data and workspace rules live in the independent NestJS REST API under `/api/v1`, so a future Flutter client can use the same service without direct database access or duplicated business logic.
 
-## Phase 1 scope
+## Current scope
 
 Implemented:
 
@@ -16,9 +16,14 @@ Implemented:
 - development-only demo authentication and automatic personal-workspace provisioning
 - independent Redis/BullMQ worker with graceful shutdown and a real database startup job
 - dashboard, lead detail, Leads CRUD, Companies CRUD, Contacts CRUD, and Settings UI/API
+- manual lead/company analysis jobs using Redis/BullMQ
+- protected website analyzer with SSRF safeguards, redirect validation, timeouts, and response-size limits
+- deterministic backend score calculation with score bands and per-factor score history
+- manual score override without destroying original score history
+- AI settings status, scoring weight settings, review queue, and Phase 2 demo fixtures
 - idempotent demo seed data and a Postman collection
 
-Not implemented in Phase 1: OpenAI, Gmail, X, Reddit, Telegram, lead scraping/discovery, website analysis, contact/email enrichment, lead hunts, automated outreach, follow-ups, or external integrations. The sidebar marks these later-phase areas as unavailable rather than pretending they work.
+Not implemented yet: automated Google/web lead searches, agency directory scraping, X/Reddit/Telegram discovery jobs, Hunter, Apollo, email verification providers, Gmail sending, automatic emails, follow-ups, or automated outreach.
 
 ## Architecture
 
@@ -32,7 +37,8 @@ apps/api (NestJS /api/v1)
 
 apps/worker (independent process)
         ├── Redis / BullMQ
-        └── PostgreSQL via Prisma
+        ├── PostgreSQL via Prisma
+        └── OpenAI analysis when OPENAI_API_KEY is configured
 ```
 
 No Next.js API routes or server actions contain core business logic.
@@ -48,7 +54,7 @@ packages/
   database/             Prisma schema, migration, generated client, seed
   types/                shared client-safe TypeScript contracts
   validation/           shared Zod validation utilities
-  shared/               framework-neutral constants and normalization helpers
+  shared/               framework-neutral constants, normalization, and score helpers
   eslint-config/        shared flat ESLint configurations
 docs/postman/           importable Phase 1 Postman collection
 docker-compose.yml      local PostgreSQL 16 and Redis 7
@@ -158,6 +164,8 @@ Only public Supabase values belong in the web application.
 | `RATE_LIMIT_TTL_MS` | no | Rate-limit window, default `60000` |
 | `RATE_LIMIT_MAX` | no | Requests per window, default `120` |
 | `GENERATE_OPENAPI` | no | Writes `apps/api/openapi.json` on startup when `true` |
+| `OPENAI_API_KEY` | Phase 2 AI | Enables OpenAI-backed structured analysis in the worker |
+| `OPENAI_MODEL` | no | Model used for analysis; defaults to `gpt-4o-mini` |
 
 No Supabase service-role key is required in Phase 1 because the API validates user tokens and uses its own PostgreSQL connection. Never expose a database URL, service-role key, or JWT secret to the web client.
 
@@ -168,6 +176,8 @@ No Supabase service-role key is required in Phase 1 because the API validates us
 | `NODE_ENV` | yes | Runtime environment |
 | `DATABASE_URL` | yes | Same PostgreSQL database used by the API |
 | `REDIS_URL` | yes | Redis connection used by BullMQ |
+| `OPENAI_API_KEY` | Phase 2 AI | Same key used by analysis jobs |
+| `OPENAI_MODEL` | no | Same model used by analysis jobs |
 
 ## Supabase setup
 
@@ -192,6 +202,7 @@ The committed migration is:
 
 ```text
 packages/database/prisma/migrations/20260901134345_init/migration.sql
+packages/database/prisma/migrations/20260904181328_phase_2_analysis_scoring/migration.sql
 ```
 
 Useful commands:
@@ -204,9 +215,9 @@ pnpm db:seed
 pnpm db:studio
 ```
 
-The schema includes Phase 1 tables plus foundations requested for later phases: users, workspaces, members, companies, contacts, raw leads, leads, signals, score records, queries, campaigns, outreach, replies, activities, action queue, suppression, source statistics, integrations, jobs, automation, audit logs, settings, and future device tokens.
+The schema includes users, workspaces, members, companies, contacts, raw leads, leads, signals, score records, AI usage logs, queries, campaigns, outreach, replies, activities, action queue, suppression, source statistics, integrations, jobs, automation, audit logs, settings, and future device tokens.
 
-The seed is idempotent for the `demo-workspace` and creates clearly labeled `DEMO DATA`: 30 raw leads, 15 companies, 20 contacts, 12 leads, 8 shortlist candidates, 5 outreach records, 3 replies, and one interested lead.
+The seed is idempotent for the `demo-workspace` and creates clearly labeled `DEMO DATA`: 30 raw leads, 15 companies, 20 contacts, 18 leads, 8 shortlist candidates, 5 outreach records, 3 replies, and Phase 2 fixtures for agency partnership, active Flutter requirement, invalid freelancer, student project, large mobile-agency weak fit, and review-stage SaaS MVP.
 
 ## API response contract
 
@@ -235,7 +246,7 @@ Error:
 }
 ```
 
-## Phase 1 endpoints
+## API endpoints
 
 All business endpoints require a bearer token.
 
@@ -246,14 +257,24 @@ GET    /api/v1/dashboard
 GET    /api/v1/leads
 POST   /api/v1/leads
 GET    /api/v1/leads/:id
+GET    /api/v1/leads/:id/scores
+POST   /api/v1/leads/:id/analyze
+POST   /api/v1/leads/:id/rescore
+POST   /api/v1/leads/:id/score-override
 PATCH  /api/v1/leads/:id
 DELETE /api/v1/leads/:id
 
 GET    /api/v1/companies
 POST   /api/v1/companies
 GET    /api/v1/companies/:id
+POST   /api/v1/companies/:id/analyze
 PATCH  /api/v1/companies/:id
 DELETE /api/v1/companies/:id
+
+POST   /api/v1/analysis/website
+
+GET    /api/v1/jobs
+GET    /api/v1/jobs/:id
 
 GET    /api/v1/contacts
 POST   /api/v1/contacts
@@ -262,6 +283,9 @@ PATCH  /api/v1/contacts/:id
 DELETE /api/v1/contacts/:id
 
 GET    /api/v1/settings
+GET    /api/v1/settings/ai
+GET    /api/v1/settings/scoring
+PATCH  /api/v1/settings/scoring
 PATCH  /api/v1/settings
 ```
 
@@ -279,7 +303,18 @@ pnpm test:e2e
 pnpm build
 ```
 
-The API integration suite requires a migrated/seeded test database at `DATABASE_URL`. It verifies unauthenticated rejection, public health, workspace isolation, pagination, and a full company/contact/lead CRUD cycle.
+The API integration suite requires a migrated/seeded test database at `DATABASE_URL` and Redis for queue tests. It verifies unauthenticated rejection, public health, workspace isolation, pagination, CRUD, scoring settings validation, private URL blocking, analysis enqueueing, and manual score override history.
+
+## Manual Phase 2 test procedure
+
+1. Start all services with `pnpm dev`.
+2. Open `http://localhost:3000`, enter the demo workspace, and go to Leads.
+3. Add a lead with source text: `Looking for an experienced Flutter developer to finish our Firebase application this month. Need someone available immediately.`
+4. Open the lead detail page and click **Analyze**.
+5. Watch `/review` or `GET /api/v1/jobs/:id` until the worker completes the job.
+6. Confirm the lead shows a score, band, factor breakdown, evidence, explanation, and outreach recommendation.
+7. Repeat with `I'm available for Flutter freelance work` and confirm it is marked invalid/rejected.
+8. Try `POST /api/v1/analysis/website` with `http://127.0.0.1` and confirm it is blocked.
 
 ## Deployment notes
 
@@ -290,6 +325,7 @@ The API integration suite requires a migrated/seeded test database at `DATABASE_
 - Run `pnpm db:migrate:deploy` during an API deployment release step.
 - Configure `WEB_APP_URL` to the exact production web origin.
 - Swagger is currently exposed at `/api/docs`; protect or disable it at the infrastructure layer if required by your production policy.
+- Keep `OPENAI_API_KEY` only in API/worker environments. Never expose it to the web client.
 
 ## Troubleshooting
 
@@ -298,6 +334,7 @@ The API integration suite requires a migrated/seeded test database at `DATABASE_
 - **401 with a Supabase token:** confirm `SUPABASE_URL`, token issuer, project signing-key mode, and legacy secret if using HS256.
 - **Demo login returns 401:** enable both `NEXT_PUBLIC_DEMO_MODE` and API `DEMO_AUTH_ENABLED`, and do not use production mode.
 - **Prisma client types are missing after dependency changes:** run `pnpm db:generate`.
+- **Analysis jobs stay queued:** verify the worker is running and `REDIS_URL` points to the same Redis instance used by the API.
 - **Next Turbopack cannot bind an internal port during a managed build:** the committed production build already uses `next build --webpack`.
 
-Phase 2 should begin only after this foundation remains green; it will add AI analysis and scoring without moving business logic into the web client.
+Phase 3 should begin only after this foundation remains green. Discovery and outreach automation are intentionally still absent.

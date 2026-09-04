@@ -1,17 +1,24 @@
-import { MiddlewareConsumer, Module, NestModule, RequestMethod } from '@nestjs/common';
-import { ConfigModule } from '@nestjs/config';
-import { APP_GUARD } from '@nestjs/core';
-import { ThrottlerGuard, ThrottlerModule } from '@nestjs/throttler';
-import { AuthGuard } from './auth/auth.guard';
-import { AuthModule } from './auth/auth.module';
-import { CompaniesModule } from './companies/companies.module';
-import { ContactsModule } from './contacts/contacts.module';
-import { DashboardModule } from './dashboard/dashboard.module';
-import { HealthModule } from './health/health.module';
-import { LeadsModule } from './leads/leads.module';
-import { PrismaModule } from './prisma/prisma.module';
-import { RequestIdMiddleware } from './common/request-id.middleware';
-import { SettingsModule } from './settings/settings.module';
+import {
+  MiddlewareConsumer,
+  Module,
+  NestModule,
+  RequestMethod,
+} from "@nestjs/common";
+import { ConfigModule } from "@nestjs/config";
+import { APP_GUARD } from "@nestjs/core";
+import { ThrottlerGuard, ThrottlerModule } from "@nestjs/throttler";
+import { AuthGuard } from "./auth/auth.guard";
+import { AuthModule } from "./auth/auth.module";
+import { CompaniesModule } from "./companies/companies.module";
+import { ContactsModule } from "./contacts/contacts.module";
+import { DashboardModule } from "./dashboard/dashboard.module";
+import { HealthModule } from "./health/health.module";
+import { AnalysisModule } from "./analysis/analysis.module";
+import { JobsModule } from "./jobs/jobs.module";
+import { LeadsModule } from "./leads/leads.module";
+import { PrismaModule } from "./prisma/prisma.module";
+import { RequestIdMiddleware } from "./common/request-id.middleware";
+import { SettingsModule } from "./settings/settings.module";
 
 @Module({
   imports: [
@@ -25,10 +32,12 @@ import { SettingsModule } from './settings/settings.module';
     PrismaModule,
     AuthModule,
     HealthModule,
+    AnalysisModule,
     DashboardModule,
     CompaniesModule,
     ContactsModule,
     LeadsModule,
+    JobsModule,
     SettingsModule,
   ],
   providers: [
@@ -38,6 +47,8 @@ import { SettingsModule } from './settings/settings.module';
 })
 export class AppModule implements NestModule {
   configure(consumer: MiddlewareConsumer) {
-    consumer.apply(RequestIdMiddleware).forRoutes({ path: '*path', method: RequestMethod.ALL });
+    consumer
+      .apply(RequestIdMiddleware)
+      .forRoutes({ path: "*path", method: RequestMethod.ALL });
   }
 }

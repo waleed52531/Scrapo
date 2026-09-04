@@ -41,6 +41,12 @@ importers:
       '@scrapo/database':
         specifier: workspace:*
         version: link:../../packages/database
+      '@scrapo/shared':
+        specifier: workspace:*
+        version: link:../../packages/shared
+      bullmq:
+        specifier: 6.3.4
+        version: 6.3.4(ioredis@5.11.1(supports-color@8.1.1))
       class-transformer:
         specifier: ^0.5.1
         version: 0.5.1
@@ -50,6 +56,9 @@ importers:
       helmet:
         specifier: ^8.1.0
         version: 8.3.0
+      ioredis:
+        specifier: ^5.7.0
+        version: 5.11.1(supports-color@8.1.1)
       jose:
         specifier: ^6.1.0
         version: 6.2.10
@@ -181,6 +190,9 @@ importers:
       '@scrapo/database':
         specifier: workspace:*
         version: link:../../packages/database
+      '@scrapo/shared':
+        specifier: workspace:*
+        version: link:../../packages/shared
       bullmq:
         specifier: 6.3.4
         version: 6.3.4(ioredis@5.11.1(supports-color@8.1.1))
@@ -190,6 +202,9 @@ importers:
       ioredis:
         specifier: ^5.7.0
         version: 5.11.1(supports-color@8.1.1)
+      zod:
+        specifier: ^4.1.5
+        version: 4.5.4
     devDependencies:
       '@scrapo/eslint-config':
         specifier: workspace:*

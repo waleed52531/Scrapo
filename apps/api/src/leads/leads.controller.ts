@@ -1,43 +1,111 @@
-import { Body, Controller, Delete, Get, HttpCode, Inject, Param, ParseUUIDPipe, Patch, Post, Query } from '@nestjs/common';
-import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
-import { CurrentAuth, type AuthContext } from '../auth/current-auth.decorator';
-import { CreateLeadDto, LeadQueryDto, UpdateLeadDto } from './dto/lead.dto';
-import { LeadsService } from './leads.service';
+import {
+  Body,
+  Controller,
+  Delete,
+  Get,
+  HttpCode,
+  Inject,
+  Param,
+  ParseUUIDPipe,
+  Patch,
+  Post,
+  Query,
+} from "@nestjs/common";
+import { ApiBearerAuth, ApiOperation, ApiTags } from "@nestjs/swagger";
+import { AnalyzeLeadDto, ScoreOverrideDto } from "../analysis/dto/analysis.dto";
+import { CurrentAuth, type AuthContext } from "../auth/current-auth.decorator";
+import { CreateLeadDto, LeadQueryDto, UpdateLeadDto } from "./dto/lead.dto";
+import { LeadsService } from "./leads.service";
 
-@ApiTags('leads')
+@ApiTags("leads")
 @ApiBearerAuth()
-@Controller('leads')
+@Controller("leads")
 export class LeadsController {
   constructor(@Inject(LeadsService) private readonly leads: LeadsService) {}
 
   @Get()
-  @ApiOperation({ summary: 'List and filter workspace leads' })
+  @ApiOperation({ summary: "List and filter workspace leads" })
   list(@CurrentAuth() auth: AuthContext, @Query() query: LeadQueryDto) {
     return this.leads.list(auth.workspaceId, query);
   }
 
   @Post()
-  @ApiOperation({ summary: 'Create a manual or pre-qualified lead' })
+  @ApiOperation({ summary: "Create a manual or pre-qualified lead" })
   create(@CurrentAuth() auth: AuthContext, @Body() input: CreateLeadDto) {
     return this.leads.create(auth.workspaceId, auth.userId, input);
   }
 
-  @Get(':id')
-  @ApiOperation({ summary: 'Get a lead with company, contact, signals, score, and activity' })
-  get(@CurrentAuth() auth: AuthContext, @Param('id', ParseUUIDPipe) id: string) {
+  @Get(":id")
+  @ApiOperation({
+    summary: "Get a lead with company, contact, signals, score, and activity",
+  })
+  get(
+    @CurrentAuth() auth: AuthContext,
+    @Param("id", ParseUUIDPipe) id: string,
+  ) {
     return this.leads.get(auth.workspaceId, id);
   }
 
-  @Patch(':id')
-  @ApiOperation({ summary: 'Update a lead' })
-  update(@CurrentAuth() auth: AuthContext, @Param('id', ParseUUIDPipe) id: string, @Body() input: UpdateLeadDto) {
+  @Get(":id/scores")
+  @ApiOperation({ summary: "Get score history for a lead" })
+  scores(
+    @CurrentAuth() auth: AuthContext,
+    @Param("id", ParseUUIDPipe) id: string,
+  ) {
+    return this.leads.scores(auth.workspaceId, id);
+  }
+
+  @Post(":id/analyze")
+  @HttpCode(202)
+  @ApiOperation({ summary: "Queue AI/manual lead analysis" })
+  analyze(
+    @CurrentAuth() auth: AuthContext,
+    @Param("id", ParseUUIDPipe) id: string,
+    @Body() input: AnalyzeLeadDto,
+  ) {
+    return this.leads.analyze(auth.workspaceId, auth.userId, id, input);
+  }
+
+  @Post(":id/rescore")
+  @HttpCode(202)
+  @ApiOperation({ summary: "Queue a lead rescore using current settings" })
+  rescore(
+    @CurrentAuth() auth: AuthContext,
+    @Param("id", ParseUUIDPipe) id: string,
+  ) {
+    return this.leads.rescore(auth.workspaceId, auth.userId, id);
+  }
+
+  @Post(":id/score-override")
+  @ApiOperation({
+    summary:
+      "Manually override the latest visible lead score without deleting history",
+  })
+  overrideScore(
+    @CurrentAuth() auth: AuthContext,
+    @Param("id", ParseUUIDPipe) id: string,
+    @Body() input: ScoreOverrideDto,
+  ) {
+    return this.leads.overrideScore(auth.workspaceId, auth.userId, id, input);
+  }
+
+  @Patch(":id")
+  @ApiOperation({ summary: "Update a lead" })
+  update(
+    @CurrentAuth() auth: AuthContext,
+    @Param("id", ParseUUIDPipe) id: string,
+    @Body() input: UpdateLeadDto,
+  ) {
     return this.leads.update(auth.workspaceId, auth.userId, id, input);
   }
 
-  @Delete(':id')
+  @Delete(":id")
   @HttpCode(200)
-  @ApiOperation({ summary: 'Delete a lead' })
-  delete(@CurrentAuth() auth: AuthContext, @Param('id', ParseUUIDPipe) id: string) {
+  @ApiOperation({ summary: "Delete a lead" })
+  delete(
+    @CurrentAuth() auth: AuthContext,
+    @Param("id", ParseUUIDPipe) id: string,
+  ) {
     return this.leads.delete(auth.workspaceId, auth.userId, id);
   }
 }
