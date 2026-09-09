@@ -4,7 +4,7 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "build": "tsc -p tsconfig.json",
+    "build": "pnpm --filter @scrapo/shared build && tsc -p tsconfig.json",
     "dev": "tsx watch src/main.ts",
     "start": "node dist/main.js",
     "typecheck": "pnpm --filter @scrapo/shared build && tsc -p tsconfig.json --noEmit",
