@@ -23,7 +23,7 @@
     "openapi:postman": "node scripts/openapi-to-postman.mjs",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
-    "db:generate": "pnpm --filter @scrapo/database generate",
+    "db:generate": "pnpm --filter @scrapo/database generate && pnpm --filter @scrapo/api exec prisma generate --schema ../../packages/database/prisma/schema.prisma && pnpm --filter @scrapo/worker exec prisma generate --schema ../../packages/database/prisma/schema.prisma",
     "db:migrate": "pnpm --filter @scrapo/database migrate:dev",
     "db:migrate:deploy": "pnpm --filter @scrapo/database migrate:deploy",
     "db:seed": "pnpm --filter @scrapo/database seed",
