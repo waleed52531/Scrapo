@@ -18,7 +18,7 @@ type AuthContextValue = {
   isDemo: boolean;
   email: string | null;
   signInWithPassword: (email: string, password: string) => Promise<void>;
-  useDemo: () => void;
+  signUpWithPassword: (email: string, password: string) => Promise<string>;
   signOut: () => Promise<void>;
 };
 
@@ -31,8 +31,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     const supabase = getSupabaseBrowserClient();
-    const storedDemo =
-      window.localStorage.getItem("scrapo.access-token") === "demo-token";
+    const demoModeEnabled = process.env.NEXT_PUBLIC_DEMO_MODE === "true";
+    const storedDemo = demoModeEnabled
+      ? window.localStorage.getItem("scrapo.access-token") === "demo-token"
+      : false;
+    if (!demoModeEnabled) {
+      window.localStorage.removeItem("scrapo.access-token");
+    }
     if (!supabase) {
       void Promise.resolve().then(() => {
         setIsDemo(storedDemo);
@@ -72,7 +77,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       const supabase = getSupabaseBrowserClient();
       if (!supabase)
         throw new Error(
-          "Supabase is not configured. Use Demo Mode or add web environment variables.",
+          "Supabase is not configured. Add the web environment variables.",
         );
       const { data, error } = await supabase.auth.signInWithPassword({
         email,
@@ -90,10 +95,28 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     [],
   );
 
-  const useDemo = useCallback(() => {
-    window.localStorage.setItem("scrapo.access-token", "demo-token");
-    setIsDemo(true);
-  }, []);
+  const signUpWithPassword = useCallback(
+    async (email: string, password: string) => {
+      const supabase = getSupabaseBrowserClient();
+      if (!supabase)
+        throw new Error(
+          "Supabase is not configured. Add the web environment variables.",
+        );
+      const { data, error } = await supabase.auth.signUp({ email, password });
+      if (error) throw error;
+      if (data.session) {
+        window.localStorage.setItem(
+          "scrapo.access-token",
+          data.session.access_token,
+        );
+        setSession(data.session);
+        setIsDemo(false);
+        return "Account created. You are signed in.";
+      }
+      return "Account created. Check your email to confirm it, then sign in.";
+    },
+    [],
+  );
 
   const signOut = useCallback(async () => {
     const supabase = getSupabaseBrowserClient();
@@ -110,10 +133,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       isDemo,
       email: session?.user.email ?? (isDemo ? "demo@scrapo.local" : null),
       signInWithPassword,
-      useDemo,
+      signUpWithPassword,
       signOut,
     }),
-    [loading, session, isDemo, signInWithPassword, useDemo, signOut],
+    [loading, session, isDemo, signInWithPassword, signUpWithPassword, signOut],
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

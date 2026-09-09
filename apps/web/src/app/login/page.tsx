@@ -36,6 +36,8 @@ function LoginContent() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
+  const [notice, setNotice] = useState("");
+  const [mode, setMode] = useState<"sign-in" | "sign-up">("sign-in");
   const [submitting, setSubmitting] = useState(false);
   const next = params.get("next") ?? "/dashboard";
 
@@ -47,19 +49,21 @@ function LoginContent() {
     event.preventDefault();
     setSubmitting(true);
     setError("");
+    setNotice("");
     try {
-      await auth.signInWithPassword(email, password);
-      router.replace(next);
+      if (mode === "sign-up") {
+        const message = await auth.signUpWithPassword(email, password);
+        setNotice(message);
+        if (message.includes("signed in")) router.replace(next);
+      } else {
+        await auth.signInWithPassword(email, password);
+        router.replace(next);
+      }
     } catch (cause) {
       setError(cause instanceof Error ? cause.message : "Sign in failed.");
     } finally {
       setSubmitting(false);
     }
-  }
-
-  function enterDemo() {
-    auth.useDemo();
-    router.replace(next);
   }
 
   return (
@@ -93,11 +97,42 @@ function LoginContent() {
           <CardHeader>
             <CardTitle className="text-2xl">Welcome back</CardTitle>
             <CardDescription>
-              Sign in with your Supabase account or enter the local demo
-              workspace.
+              Sign in with your Supabase account or create your first user.
             </CardDescription>
           </CardHeader>
           <CardContent>
+            <div className="mb-5 grid grid-cols-2 rounded-lg bg-slate-100 p-1 text-sm">
+              <button
+                type="button"
+                className={`rounded-md px-3 py-2 font-medium transition ${
+                  mode === "sign-in"
+                    ? "bg-white text-slate-950 shadow-sm"
+                    : "text-slate-500 hover:text-slate-800"
+                }`}
+                onClick={() => {
+                  setMode("sign-in");
+                  setError("");
+                  setNotice("");
+                }}
+              >
+                Sign in
+              </button>
+              <button
+                type="button"
+                className={`rounded-md px-3 py-2 font-medium transition ${
+                  mode === "sign-up"
+                    ? "bg-white text-slate-950 shadow-sm"
+                    : "text-slate-500 hover:text-slate-800"
+                }`}
+                onClick={() => {
+                  setMode("sign-up");
+                  setError("");
+                  setNotice("");
+                }}
+              >
+                Create account
+              </button>
+            </div>
             <form className="space-y-4" onSubmit={submit}>
               <div className="space-y-2">
                 <Label htmlFor="email">Email</Label>
@@ -126,31 +161,22 @@ function LoginContent() {
                   {error}
                 </p>
               )}
+              {notice && (
+                <p className="rounded-md bg-emerald-50 p-3 text-sm text-emerald-700">
+                  {notice}
+                </p>
+              )}
               <Button className="w-full" disabled={submitting}>
-                {submitting ? "Signing in…" : "Sign in"}
+                {submitting
+                  ? mode === "sign-up"
+                    ? "Creating account…"
+                    : "Signing in…"
+                  : mode === "sign-up"
+                    ? "Create account"
+                    : "Sign in"}
                 <ArrowRight className="h-4 w-4" />
               </Button>
             </form>
-            {process.env.NEXT_PUBLIC_DEMO_MODE === "true" && (
-              <>
-                <div className="my-5 flex items-center gap-3 text-xs uppercase tracking-wider text-slate-400">
-                  <span className="h-px flex-1 bg-slate-200" />
-                  or
-                  <span className="h-px flex-1 bg-slate-200" />
-                </div>
-                <Button
-                  variant="outline"
-                  className="w-full"
-                  onClick={enterDemo}
-                >
-                  Enter demo workspace
-                </Button>
-                <p className="mt-3 text-center text-xs text-slate-500">
-                  Demo mode is development-only and requires DEMO_AUTH_ENABLED
-                  on the API.
-                </p>
-              </>
-            )}
           </CardContent>
         </Card>
       </section>
