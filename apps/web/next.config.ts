@@ -10,7 +10,7 @@ const nextConfig: NextConfig = {
       "style-src 'self' 'unsafe-inline'",
       "img-src 'self' data: https:",
       "font-src 'self' data:",
-      "connect-src 'self' http://localhost:4000 https://*.supabase.co https://*.supabase.in",
+      "connect-src 'self' http://localhost:4000 https://*.onrender.com https://*.supabase.co https://*.supabase.in",
       "frame-ancestors 'none'",
       "base-uri 'self'",
       "form-action 'self'",
