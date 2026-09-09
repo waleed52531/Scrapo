@@ -4,6 +4,9 @@ Use separate deployments for web, API, and worker. Do not put backend secrets in
 
 ## Web deployment
 
+Recommended host: Vercel. Import the GitHub repo, set the root directory to
+`apps/web`, and keep the build settings from `apps/web/vercel.json`.
+
 Required public variables:
 
 - `NEXT_PUBLIC_API_URL`
@@ -19,6 +22,9 @@ pnpm start:web
 ```
 
 ## API deployment
+
+Recommended host: Render. Use `render.yaml` from the repo root as a Blueprint,
+or create a Node web service manually with the same commands.
 
 Required production variables:
 
@@ -45,6 +51,11 @@ AUTO_SEND_ENABLED=false
 ALLOW_MOCK_PROVIDERS_IN_PRODUCTION=false
 ```
 
+The production Render blueprint intentionally sets `GMAIL_PROVIDER_MODE=REAL`.
+If Google OAuth credentials are not ready yet, either finish Gmail setup before
+deploying production or deploy a separate staging service with `NODE_ENV=staging`
+for smoke testing.
+
 Build/start:
 
 ```bash
@@ -54,7 +65,19 @@ pnpm start:api
 
 ## Worker deployment
 
+Recommended host: Render background worker. Use the `scrapo-worker` service from
+`render.yaml`, or create a Node background worker manually with the same
+commands.
+
 The worker must run continuously without web traffic. Required variables match the API for database, Redis, Gmail, provider modes, and safety limits.
+
+For Upstash Redis with BullMQ/ioredis, use the TCP URL, usually:
+
+```env
+REDIS_URL=rediss://default:<password>@<database>.upstash.io:6379
+```
+
+Do not use the Upstash REST URL for BullMQ.
 
 Build/start:
 

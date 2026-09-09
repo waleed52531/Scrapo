@@ -1,0 +1,114 @@
+services:
+  - type: web
+    name: scrapo-api
+    runtime: node
+    region: singapore
+    plan: free
+    branch: main
+    buildCommand: corepack enable && pnpm install --frozen-lockfile && pnpm db:generate && pnpm --filter @scrapo/api build
+    preDeployCommand: pnpm db:migrate:deploy
+    startCommand: pnpm start:api
+    healthCheckPath: /api/v1/health
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: APP_VERSION
+        value: 0.1.0
+      - key: DATABASE_URL
+        sync: false
+      - key: REDIS_URL
+        sync: false
+      - key: SUPABASE_URL
+        value: https://fwfwuxpadhgcbdnavqms.supabase.co
+      - key: SUPABASE_JWT_SECRET
+        sync: false
+      - key: WEB_APP_URL
+        sync: false
+      - key: CORS_ALLOWED_ORIGINS
+        sync: false
+      - key: DEMO_AUTH_ENABLED
+        value: false
+      - key: OUTREACH_PAUSED
+        value: true
+      - key: AUTO_SEND_ENABLED
+        value: false
+      - key: ALLOW_PRODUCTION_AUTO_SEND
+        value: false
+      - key: ALLOW_MOCK_PROVIDERS_IN_PRODUCTION
+        value: false
+      - key: OPENAI_ENABLED
+        value: false
+      - key: WEB_SEARCH_PROVIDER
+        value: mock
+      - key: EMAIL_ENRICHMENT_PROVIDER
+        value: mock
+      - key: EMAIL_VERIFICATION_PROVIDER
+        value: mock
+      - key: GMAIL_PROVIDER_MODE
+        value: REAL
+      - key: GOOGLE_CLIENT_ID
+        sync: false
+      - key: GOOGLE_CLIENT_SECRET
+        sync: false
+      - key: GOOGLE_REDIRECT_URI
+        sync: false
+      - key: GMAIL_TOKEN_ENCRYPTION_KEY
+        sync: false
+      - key: RATE_LIMIT_TTL_MS
+        value: 60000
+      - key: RATE_LIMIT_MAX
+        value: 120
+      - key: JOB_ATTEMPTS
+        value: 2
+      - key: JOB_REMOVE_ON_COMPLETE
+        value: 100
+      - key: JOB_REMOVE_ON_FAIL
+        value: 500
+      - key: WORKER_HEARTBEAT_STALE_MS
+        value: 120000
+
+  - type: worker
+    name: scrapo-worker
+    runtime: node
+    region: singapore
+    plan: free
+    branch: main
+    buildCommand: corepack enable && pnpm install --frozen-lockfile && pnpm db:generate && pnpm --filter @scrapo/worker build
+    startCommand: pnpm start:worker
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: APP_VERSION
+        value: 0.1.0
+      - key: DATABASE_URL
+        sync: false
+      - key: REDIS_URL
+        sync: false
+      - key: WORKER_HEARTBEAT_INTERVAL_MS
+        value: 30000
+      - key: JOB_ATTEMPTS
+        value: 2
+      - key: JOB_REMOVE_ON_COMPLETE
+        value: 100
+      - key: JOB_REMOVE_ON_FAIL
+        value: 500
+      - key: ALLOW_MOCK_PROVIDERS_IN_PRODUCTION
+        value: false
+      - key: OPENAI_ENABLED
+        value: false
+      - key: X_ENABLED
+        value: false
+      - key: REDDIT_ENABLED
+        value: false
+      - key: TELEGRAM_ENABLED
+        value: false
+      - key: GMAIL_PROVIDER_MODE
+        value: REAL
+      - key: GOOGLE_CLIENT_ID
+        sync: false
+      - key: GOOGLE_CLIENT_SECRET
+        sync: false
+      - key: GOOGLE_REDIRECT_URI
+        sync: false
+      - key: GMAIL_TOKEN_ENCRYPTION_KEY
+        sync: false
