@@ -44,6 +44,8 @@ const statuses = [
   "NOT_INTERESTED",
   "DO_NOT_CONTACT",
   "INVALID",
+  "STALE",
+  "ARCHIVED",
 ] as const;
 const schema = z.object({
   title: z.string().min(3, "Title is required."),
@@ -70,6 +72,7 @@ const schema = z.object({
     "GENERAL_MOBILE_SUPPORT",
     "MANUAL",
     "INVALID",
+    "PERMANENT_JOB",
     "OTHER",
   ]),
   status: z.enum(statuses),
@@ -149,6 +152,7 @@ export default function LeadsPage() {
                   <TableHead>Status</TableHead>
                   <TableHead>Source</TableHead>
                   <TableHead>Score</TableHead>
+                  <TableHead>Rank</TableHead>
                   <TableHead className="w-32" />
                 </TableRow>
               </TableHeader>
@@ -175,12 +179,32 @@ export default function LeadsPage() {
                     <TableCell>
                       <Badge>{lead.status}</Badge>
                     </TableCell>
-                    <TableCell>{lead.primarySource}</TableCell>
+                    <TableCell>
+                      <Badge className={sourceClass(lead.primarySource)}>
+                        {lead.primarySource}
+                      </Badge>
+                      {(lead._count?.signals ?? 0) > 0 && (
+                        <div className="mt-1 text-xs text-slate-500">
+                          {lead._count?.signals} signal
+                          {(lead._count?.signals ?? 0) === 1 ? "" : "s"}
+                        </div>
+                      )}
+                    </TableCell>
                     <TableCell>
                       <span className="font-semibold">{lead.overallScore}</span>
                       <span className="ml-2 text-xs text-slate-500">
                         {lead.temperature}
                       </span>
+                    </TableCell>
+                    <TableCell>
+                      <span className="font-semibold text-blue-700">
+                        {lead.rankingScore || "—"}
+                      </span>
+                      {lead.rankReason?.[0] ? (
+                        <div className="max-w-44 truncate text-xs text-slate-500">
+                          {lead.rankReason[0]}
+                        </div>
+                      ) : null}
                     </TableCell>
                     <TableCell>
                       <div className="flex justify-end gap-1">
@@ -341,6 +365,7 @@ function LeadModal({
               "FIREBASE_API_SUPPORT",
               "APP_STORE_SUPPORT",
               "GENERAL_MOBILE_SUPPORT",
+              "PERMANENT_JOB",
               "INVALID",
               "OTHER",
             ].map((item) => (
@@ -464,4 +489,12 @@ function Empty() {
       </div>
     </div>
   );
+}
+
+function sourceClass(source: string) {
+  if (source === "X") return "border-sky-200 bg-sky-50 text-sky-700";
+  if (source === "REDDIT")
+    return "border-orange-200 bg-orange-50 text-orange-700";
+  if (source === "TELEGRAM") return "border-blue-200 bg-blue-50 text-blue-700";
+  return "";
 }

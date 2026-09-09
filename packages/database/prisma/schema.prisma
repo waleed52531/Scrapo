@@ -35,7 +35,16 @@ enum LeadType {
   GENERAL_MOBILE_SUPPORT
   MANUAL
   INVALID
+  PERMANENT_JOB
   OTHER
+}
+
+enum OpportunityUrgency {
+  IMMEDIATE
+  THIS_WEEK
+  THIS_MONTH
+  FLEXIBLE
+  UNKNOWN
 }
 
 enum LeadStatus {
@@ -56,6 +65,8 @@ enum LeadStatus {
   NOT_INTERESTED
   DO_NOT_CONTACT
   INVALID
+  STALE
+  ARCHIVED
 }
 
 enum LeadTemperature {
@@ -98,20 +109,25 @@ enum RecommendedChannel {
 
 enum InvalidLeadReason {
   OTHER_FREELANCER
+  SELF_PROMOTION
   SPAM
+  BOT
   STUDENT_PROJECT
   PERMANENT_JOB_ONLY
   IRRELEVANT
   TUTORIAL
+  NEWS
   JOB_AGGREGATOR
   COMPETITOR
   EXPIRED
+  DUPLICATE
   INSUFFICIENT_INFORMATION
 }
 
 enum EmailStatus {
   UNKNOWN
   GUESSED
+  LIKELY_VALID
   UNVERIFIED
   VERIFIED
   INVALID
@@ -120,7 +136,14 @@ enum EmailStatus {
 
 enum ProcessingStatus {
   PENDING
+  DISCOVERED
+  FILTERING
   PROCESSING
+  COMPANY_CREATED
+  ANALYZING
+  ENRICHING
+  SCORED
+  QUALIFIED
   PROCESSED
   REJECTED
   FAILED
@@ -146,24 +169,43 @@ enum OutreachChannel {
 
 enum OutreachStatus {
   GENERATED
+  EDITED
   DRAFT
+  DRAFT_CREATED
   APPROVED
+  SENDING
   SENT
   DELIVERED
   REPLIED
+  FOLLOW_UP_DUE
+  FOLLOW_UP_SENT
   FAILED
   CANCELLED
+  SUPPRESSED
+}
+
+enum OutreachApprovalStatus {
+  NOT_REQUIRED
+  PENDING
+  APPROVED
+  REJECTED
 }
 
 enum ActionStatus {
   PENDING
   COMPLETED
   SKIPPED
+  EXPIRED
 }
 
 enum IntegrationStatus {
   NOT_CONFIGURED
+  CONFIGURED
+  APPROVAL_REQUIRED
+  ACTIVE
+  DISABLED
   CONNECTED
+  REAUTH_REQUIRED
   ERROR
   DISCONNECTED
 }
@@ -177,38 +219,53 @@ model User {
   updatedAt      DateTime          @updatedAt @map("updated_at")
   memberships    WorkspaceMember[]
   auditLogs      AuditLog[]        @relation("AuditActor")
+  notifications  Notification[]
+  leadFeedback   LeadFeedback[]
+  deviceTokens   DeviceToken[]
 
   @@map("users")
 }
 
 model Workspace {
-  id           String                  @id @default(uuid()) @db.Uuid
-  name         String
-  slug         String                  @unique
-  createdAt    DateTime                @default(now()) @map("created_at")
-  updatedAt    DateTime                @updatedAt @map("updated_at")
-  members      WorkspaceMember[]
-  companies    Company[]
-  contacts     Contact[]
-  rawLeads     RawLead[]
-  leads        Lead[]
-  leadSignals  LeadSignal[]
-  leadScores   LeadScore[]
-  queries      SearchQuery[]
-  campaigns    Campaign[]
-  outreach     OutreachMessage[]
-  replies      EmailReply[]
-  activities   Activity[]
-  actions      ActionItem[]
-  suppression  SuppressionEntry[]
-  statistics   SourceStatistic[]
-  integrations IntegrationConnection[]
-  jobs         SystemJob[]
-  aiUsage      AiUsageLog[]
-  automations  AutomationRule[]
-  auditLogs    AuditLog[]
-  settings     UserSettings?
-  deviceTokens DeviceToken[]
+  id                          String                       @id @default(uuid()) @db.Uuid
+  name                        String
+  slug                        String                       @unique
+  createdAt                   DateTime                     @default(now()) @map("created_at")
+  updatedAt                   DateTime                     @updatedAt @map("updated_at")
+  members                     WorkspaceMember[]
+  companies                   Company[]
+  contacts                    Contact[]
+  rawLeads                    RawLead[]
+  leads                       Lead[]
+  leadSignals                 LeadSignal[]
+  leadScores                  LeadScore[]
+  queries                     SearchQuery[]
+  campaigns                   Campaign[]
+  outreach                    OutreachMessage[]
+  replies                     EmailReply[]
+  activities                  Activity[]
+  actions                     ActionItem[]
+  socialProfiles              SocialProfile[]
+  telegramSources             TelegramSource[]
+  suppression                 SuppressionEntry[]
+  statistics                  SourceStatistic[]
+  integrations                IntegrationConnection[]
+  jobs                        SystemJob[]
+  aiUsage                     AiUsageLog[]
+  discoveryRuns               DiscoveryRun[]
+  discoveryQueryRuns          DiscoveryQueryRun[]
+  shortlists                  Shortlist[]
+  contactEnrichmentRecords    ContactEnrichmentRecord[]
+  emailVerificationRecords    EmailVerificationRecord[]
+  automations                 AutomationRule[]
+  automationRuns              AutomationRun[]
+  optimizationRecommendations OptimizationRecommendation[]
+  notifications               Notification[]
+  weeklyReports               WeeklyReport[]
+  leadFeedback                LeadFeedback[]
+  auditLogs                   AuditLog[]
+  settings                    UserSettings?
+  deviceTokens                DeviceToken[]
 
   @@map("workspaces")
 }
@@ -228,44 +285,51 @@ model WorkspaceMember {
 }
 
 model Company {
-  id                         String         @id @default(uuid()) @db.Uuid
-  workspaceId                String         @map("workspace_id") @db.Uuid
-  name                       String
-  normalizedName             String         @map("normalized_name")
-  domain                     String?
-  website                    String?
-  description                String?
-  country                    String?
-  city                       String?
-  employeeRange              String?        @map("employee_range")
-  companyType                String?        @map("company_type")
-  agencyType                 String?        @map("agency_type")
-  services                   Json           @default("[]")
-  technologies               Json           @default("[]")
-  industries                 Json           @default("[]")
-  hasWebService              Boolean        @default(false) @map("has_web_service")
-  hasBackendService          Boolean        @default(false) @map("has_backend_service")
-  hasMobileService           Boolean        @default(false) @map("has_mobile_service")
-  hasFlutterService          Boolean        @default(false) @map("has_flutter_service")
-  hasAndroidService          Boolean        @default(false) @map("has_android_service")
-  hasIosService              Boolean        @default(false) @map("has_ios_service")
-  mobileCapabilityConfidence Int            @default(0) @map("mobile_capability_confidence")
-  companyQualityScore        Int            @default(0) @map("company_quality_score")
-  partnershipFitScore        Int            @default(0) @map("partnership_fit_score")
-  companyAnalysisConfidence  Int            @default(0) @map("company_analysis_confidence")
-  companyAnalysisSummary     String?        @map("company_analysis_summary")
-  analysisStatus             AnalysisStatus @default(NOT_ANALYZED) @map("analysis_status")
-  analyzedAt                 DateTime?      @map("analyzed_at")
-  contentHash                String?        @map("content_hash")
-  aiModel                    String?        @map("ai_model")
-  promptVersion              String?        @map("prompt_version")
-  firstDiscoveredAt          DateTime       @default(now()) @map("first_discovered_at")
-  lastAnalyzedAt             DateTime?      @map("last_analyzed_at")
-  createdAt                  DateTime       @default(now()) @map("created_at")
-  updatedAt                  DateTime       @updatedAt @map("updated_at")
-  workspace                  Workspace      @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
-  contacts                   Contact[]
-  leads                      Lead[]
+  id                                     String                    @id @default(uuid()) @db.Uuid
+  workspaceId                            String                    @map("workspace_id") @db.Uuid
+  name                                   String
+  normalizedName                         String                    @map("normalized_name")
+  domain                                 String?
+  website                                String?
+  description                            String?
+  country                                String?
+  city                                   String?
+  employeeRange                          String?                   @map("employee_range")
+  companyType                            String?                   @map("company_type")
+  agencyType                             String?                   @map("agency_type")
+  services                               Json                      @default("[]")
+  technologies                           Json                      @default("[]")
+  industries                             Json                      @default("[]")
+  hasWebService                          Boolean                   @default(false) @map("has_web_service")
+  hasBackendService                      Boolean                   @default(false) @map("has_backend_service")
+  hasMobileService                       Boolean                   @default(false) @map("has_mobile_service")
+  hasFlutterService                      Boolean                   @default(false) @map("has_flutter_service")
+  hasAndroidService                      Boolean                   @default(false) @map("has_android_service")
+  hasIosService                          Boolean                   @default(false) @map("has_ios_service")
+  mobileCapabilityConfidence             Int                       @default(0) @map("mobile_capability_confidence")
+  companyQualityScore                    Int                       @default(0) @map("company_quality_score")
+  partnershipFitScore                    Int                       @default(0) @map("partnership_fit_score")
+  companyAnalysisConfidence              Int                       @default(0) @map("company_analysis_confidence")
+  companyAnalysisSummary                 String?                   @map("company_analysis_summary")
+  analysisStatus                         AnalysisStatus            @default(NOT_ANALYZED) @map("analysis_status")
+  analyzedAt                             DateTime?                 @map("analyzed_at")
+  contentHash                            String?                   @map("content_hash")
+  aiModel                                String?                   @map("ai_model")
+  promptVersion                          String?                   @map("prompt_version")
+  discoveryCount                         Int                       @default(0) @map("discovery_count")
+  lastDiscoveredAt                       DateTime?                 @map("last_discovered_at")
+  duplicateConfidence                    Int                       @default(0) @map("duplicate_confidence")
+  preQualificationScore                  Int                       @default(0) @map("pre_qualification_score")
+  mobileOutsourcingOpportunityConfidence Int                       @default(0) @map("mobile_outsourcing_opportunity_confidence")
+  enrichmentStatus                       String?                   @map("enrichment_status")
+  firstDiscoveredAt                      DateTime                  @default(now()) @map("first_discovered_at")
+  lastAnalyzedAt                         DateTime?                 @map("last_analyzed_at")
+  createdAt                              DateTime                  @default(now()) @map("created_at")
+  updatedAt                              DateTime                  @updatedAt @map("updated_at")
+  workspace                              Workspace                 @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  contacts                               Contact[]
+  leads                                  Lead[]
+  enrichmentRecords                      ContactEnrichmentRecord[]
 
   @@unique([workspaceId, domain])
   @@index([workspaceId, normalizedName])
@@ -274,27 +338,36 @@ model Company {
 }
 
 model Contact {
-  id                 String             @id @default(uuid()) @db.Uuid
-  workspaceId        String             @map("workspace_id") @db.Uuid
-  companyId          String?            @map("company_id") @db.Uuid
-  fullName           String             @map("full_name")
-  role               String?
-  email              String?
-  emailStatus        EmailStatus        @default(UNKNOWN) @map("email_status")
-  emailSource        String?            @map("email_source")
-  linkedinUrl        String?            @map("linkedin_url")
-  xUrl               String?            @map("x_url")
-  redditUsername     String?            @map("reddit_username")
-  telegramUsername   String?            @map("telegram_username")
-  profileUrl         String?            @map("profile_url")
-  decisionMakerScore Int                @default(0) @map("decision_maker_score")
-  contactConfidence  Int                @default(0) @map("contact_confidence")
-  createdAt          DateTime           @default(now()) @map("created_at")
-  updatedAt          DateTime           @updatedAt @map("updated_at")
-  workspace          Workspace          @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
-  company            Company?           @relation(fields: [companyId], references: [id], onDelete: SetNull)
-  leads              Lead[]
-  suppressionEntries SuppressionEntry[]
+  id                       String                    @id @default(uuid()) @db.Uuid
+  workspaceId              String                    @map("workspace_id") @db.Uuid
+  companyId                String?                   @map("company_id") @db.Uuid
+  fullName                 String                    @map("full_name")
+  role                     String?
+  email                    String?
+  emailStatus              EmailStatus               @default(UNKNOWN) @map("email_status")
+  emailSource              String?                   @map("email_source")
+  source                   String?
+  verifiedAt               DateTime?                 @map("verified_at")
+  verificationProvider     String?                   @map("verification_provider")
+  verificationResult       Json                      @default("{}") @map("verification_result")
+  linkedinUrl              String?                   @map("linkedin_url")
+  xUrl                     String?                   @map("x_url")
+  redditUsername           String?                   @map("reddit_username")
+  telegramUsername         String?                   @map("telegram_username")
+  profileUrl               String?                   @map("profile_url")
+  decisionMakerScore       Int                       @default(0) @map("decision_maker_score")
+  contactConfidence        Int                       @default(0) @map("contact_confidence")
+  createdAt                DateTime                  @default(now()) @map("created_at")
+  updatedAt                DateTime                  @updatedAt @map("updated_at")
+  workspace                Workspace                 @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  company                  Company?                  @relation(fields: [companyId], references: [id], onDelete: SetNull)
+  leads                    Lead[]
+  outreach                 OutreachMessage[]
+  replies                  EmailReply[]
+  actionItems              ActionItem[]
+  suppressionEntries       SuppressionEntry[]
+  socialProfiles           SocialProfile[]
+  emailVerificationRecords EmailVerificationRecord[]
 
   @@unique([workspaceId, email])
   @@index([workspaceId, companyId])
@@ -306,15 +379,28 @@ model RawLead {
   id               String           @id @default(uuid()) @db.Uuid
   workspaceId      String           @map("workspace_id") @db.Uuid
   source           LeadSource
+  searchQueryId    String?          @map("search_query_id") @db.Uuid
+  discoveryRunId   String?          @map("discovery_run_id") @db.Uuid
   externalId       String?          @map("external_id")
   sourceUrl        String?          @map("source_url")
+  title            String?
+  description      String?
+  domain           String?
+  authorExternalId String?          @map("author_external_id")
+  username         String?
+  displayName      String?          @map("display_name")
+  profileUrl       String?          @map("profile_url")
+  engagement       Json             @default("{}")
   author           String?
   content          String
+  rejectionReason  String?          @map("rejection_reason")
   publishedAt      DateTime?        @map("published_at")
   rawPayload       Json             @default("{}") @map("raw_payload")
   processingStatus ProcessingStatus @default(PENDING) @map("processing_status")
   createdAt        DateTime         @default(now()) @map("created_at")
   workspace        Workspace        @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  searchQuery      SearchQuery?     @relation(fields: [searchQueryId], references: [id], onDelete: SetNull)
+  discoveryRun     DiscoveryRun?    @relation(fields: [discoveryRunId], references: [id], onDelete: SetNull)
   signals          LeadSignal[]
 
   @@unique([workspaceId, source, externalId])
@@ -323,72 +409,107 @@ model RawLead {
 }
 
 model Lead {
-  id                      String                  @id @default(uuid()) @db.Uuid
-  workspaceId             String                  @map("workspace_id") @db.Uuid
-  companyId               String?                 @map("company_id") @db.Uuid
-  contactId               String?                 @map("contact_id") @db.Uuid
-  primarySource           LeadSource              @default(MANUAL) @map("primary_source")
-  leadType                LeadType                @default(MANUAL) @map("lead_type")
-  title                   String
-  opportunitySummary      String?                 @map("opportunity_summary")
-  recommendedPitch        String?                 @map("recommended_pitch")
-  sourceUrl               String?                 @map("source_url")
-  sourceContent           String?                 @map("source_content")
-  publishedAt             DateTime?               @map("published_at")
-  analysisStatus          AnalysisStatus          @default(NOT_ANALYZED) @map("analysis_status")
-  analysisConfidence      Int                     @default(0) @map("analysis_confidence")
-  analysisSummary         String?                 @map("analysis_summary")
-  evidence                Json                    @default("{}")
-  aiInterpretation        Json                    @default("{}") @map("ai_interpretation")
-  unknowns                Json                    @default("[]")
-  invalidReason           InvalidLeadReason?      @map("invalid_reason")
-  outreachRecommendation  OutreachRecommendation? @map("outreach_recommendation")
-  recommendedChannel      RecommendedChannel?     @map("recommended_channel")
-  scoreOverrideOriginal   Int?                    @map("score_override_original")
-  scoreOverrideScore      Int?                    @map("score_override_score")
-  scoreOverrideReason     String?                 @map("score_override_reason")
-  scoreOverriddenByUserId String?                 @map("score_overridden_by_user_id") @db.Uuid
-  scoreOverriddenAt       DateTime?               @map("score_overridden_at")
-  aiModel                 String?                 @map("ai_model")
-  promptVersion           String?                 @map("prompt_version")
-  status                  LeadStatus              @default(NEW)
-  temperature             LeadTemperature         @default(REVIEW)
-  overallScore            Int                     @default(0) @map("overall_score")
-  firstDiscoveredAt       DateTime                @default(now()) @map("first_discovered_at")
-  lastSignalAt            DateTime                @default(now()) @map("last_signal_at")
-  createdAt               DateTime                @default(now()) @map("created_at")
-  updatedAt               DateTime                @updatedAt @map("updated_at")
-  workspace               Workspace               @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
-  company                 Company?                @relation(fields: [companyId], references: [id], onDelete: SetNull)
-  contact                 Contact?                @relation(fields: [contactId], references: [id], onDelete: SetNull)
-  signals                 LeadSignal[]
-  scores                  LeadScore[]
-  outreach                OutreachMessage[]
-  activities              Activity[]
-  actions                 ActionItem[]
+  id                          String                  @id @default(uuid()) @db.Uuid
+  workspaceId                 String                  @map("workspace_id") @db.Uuid
+  companyId                   String?                 @map("company_id") @db.Uuid
+  contactId                   String?                 @map("contact_id") @db.Uuid
+  primarySearchQueryId        String?                 @map("primary_search_query_id") @db.Uuid
+  discoveryRunId              String?                 @map("discovery_run_id") @db.Uuid
+  primarySignalId             String?                 @map("primary_signal_id") @db.Uuid
+  primarySource               LeadSource              @default(MANUAL) @map("primary_source")
+  leadType                    LeadType                @default(MANUAL) @map("lead_type")
+  title                       String
+  opportunitySummary          String?                 @map("opportunity_summary")
+  recommendedPitch            String?                 @map("recommended_pitch")
+  sourceUrl                   String?                 @map("source_url")
+  sourceContent               String?                 @map("source_content")
+  publishedAt                 DateTime?               @map("published_at")
+  analysisStatus              AnalysisStatus          @default(NOT_ANALYZED) @map("analysis_status")
+  analysisConfidence          Int                     @default(0) @map("analysis_confidence")
+  analysisSummary             String?                 @map("analysis_summary")
+  socialPreQualificationScore Int                     @default(0) @map("social_pre_qualification_score")
+  opportunityUrgency          OpportunityUrgency      @default(UNKNOWN) @map("opportunity_urgency")
+  buyerIntentScore            Int                     @default(0) @map("buyer_intent_score")
+  selfPromotionProbability    Int                     @default(0) @map("self_promotion_probability")
+  socialSpamProbability       Int                     @default(0) @map("social_spam_probability")
+  sourceCount                 Int                     @default(1) @map("source_count")
+  evidence                    Json                    @default("{}")
+  aiInterpretation            Json                    @default("{}") @map("ai_interpretation")
+  unknowns                    Json                    @default("[]")
+  invalidReason               InvalidLeadReason?      @map("invalid_reason")
+  outreachRecommendation      OutreachRecommendation? @map("outreach_recommendation")
+  recommendedChannel          RecommendedChannel?     @map("recommended_channel")
+  scoreOverrideOriginal       Int?                    @map("score_override_original")
+  scoreOverrideScore          Int?                    @map("score_override_score")
+  scoreOverrideReason         String?                 @map("score_override_reason")
+  scoreOverriddenByUserId     String?                 @map("score_overridden_by_user_id") @db.Uuid
+  scoreOverriddenAt           DateTime?               @map("score_overridden_at")
+  aiModel                     String?                 @map("ai_model")
+  promptVersion               String?                 @map("prompt_version")
+  status                      LeadStatus              @default(NEW)
+  temperature                 LeadTemperature         @default(REVIEW)
+  overallScore                Int                     @default(0) @map("overall_score")
+  rankingScore                Int                     @default(0) @map("ranking_score")
+  rankReason                  Json                    @default("[]") @map("rank_reason")
+  rankBreakdown               Json                    @default("{}") @map("rank_breakdown")
+  staleAt                     DateTime?               @map("stale_at")
+  reactivatedAt               DateTime?               @map("reactivated_at")
+  firstDiscoveredAt           DateTime                @default(now()) @map("first_discovered_at")
+  lastSignalAt                DateTime                @default(now()) @map("last_signal_at")
+  createdAt                   DateTime                @default(now()) @map("created_at")
+  updatedAt                   DateTime                @updatedAt @map("updated_at")
+  workspace                   Workspace               @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  company                     Company?                @relation(fields: [companyId], references: [id], onDelete: SetNull)
+  contact                     Contact?                @relation(fields: [contactId], references: [id], onDelete: SetNull)
+  signals                     LeadSignal[]
+  scores                      LeadScore[]
+  outreach                    OutreachMessage[]
+  replies                     EmailReply[]
+  feedback                    LeadFeedback[]
+  activities                  Activity[]
+  actions                     ActionItem[]
+  primarySearchQuery          SearchQuery?            @relation(fields: [primarySearchQueryId], references: [id], onDelete: SetNull)
+  discoveryRun                DiscoveryRun?           @relation(fields: [discoveryRunId], references: [id], onDelete: SetNull)
+  shortlistItems              ShortlistItem[]
 
   @@index([workspaceId, status])
   @@index([workspaceId, temperature])
   @@index([workspaceId, overallScore])
+  @@index([workspaceId, rankingScore])
+  @@index([workspaceId, primarySource])
   @@index([workspaceId, createdAt])
   @@map("leads")
 }
 
 model LeadSignal {
-  id          String     @id @default(uuid()) @db.Uuid
-  workspaceId String     @map("workspace_id") @db.Uuid
-  leadId      String     @map("lead_id") @db.Uuid
-  rawLeadId   String?    @map("raw_lead_id") @db.Uuid
-  source      LeadSource
-  signalType  String     @map("signal_type")
-  content     String
-  sourceUrl   String?    @map("source_url")
-  publishedAt DateTime?  @map("published_at")
-  signalScore Int        @default(0) @map("signal_score")
-  createdAt   DateTime   @default(now()) @map("created_at")
-  workspace   Workspace  @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
-  lead        Lead       @relation(fields: [leadId], references: [id], onDelete: Cascade)
-  rawLead     RawLead?   @relation(fields: [rawLeadId], references: [id], onDelete: SetNull)
+  id                          String             @id @default(uuid()) @db.Uuid
+  workspaceId                 String             @map("workspace_id") @db.Uuid
+  leadId                      String             @map("lead_id") @db.Uuid
+  rawLeadId                   String?            @map("raw_lead_id") @db.Uuid
+  searchQueryId               String?            @map("search_query_id") @db.Uuid
+  discoveryRunId              String?            @map("discovery_run_id") @db.Uuid
+  source                      LeadSource
+  signalType                  String             @map("signal_type")
+  content                     String
+  sourceUrl                   String?            @map("source_url")
+  profileUrl                  String?            @map("profile_url")
+  authorExternalId            String?            @map("author_external_id")
+  username                    String?
+  displayName                 String?            @map("display_name")
+  authorType                  String?            @map("author_type")
+  authorTypeConfidence        Int                @default(0) @map("author_type_confidence")
+  opportunityUrgency          OpportunityUrgency @default(UNKNOWN) @map("opportunity_urgency")
+  signalQualityScore          Int                @default(0) @map("signal_quality_score")
+  socialPreQualificationScore Int                @default(0) @map("social_pre_qualification_score")
+  metadata                    Json               @default("{}")
+  publishedAt                 DateTime?          @map("published_at")
+  signalScore                 Int                @default(0) @map("signal_score")
+  createdAt                   DateTime           @default(now()) @map("created_at")
+  workspace                   Workspace          @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  lead                        Lead               @relation(fields: [leadId], references: [id], onDelete: Cascade)
+  rawLead                     RawLead?           @relation(fields: [rawLeadId], references: [id], onDelete: SetNull)
+  searchQuery                 SearchQuery?       @relation(fields: [searchQueryId], references: [id], onDelete: SetNull)
+  discoveryRun                DiscoveryRun?      @relation(fields: [discoveryRunId], references: [id], onDelete: SetNull)
 
   @@index([workspaceId, leadId])
   @@map("lead_signals")
@@ -434,66 +555,112 @@ model LeadScore {
 }
 
 model SearchQuery {
-  id               String     @id @default(uuid()) @db.Uuid
-  workspaceId      String     @map("workspace_id") @db.Uuid
-  source           LeadSource
-  query            String
-  enabled          Boolean    @default(true)
-  priority         Int        @default(0)
-  lastRun          DateTime?  @map("last_run")
-  resultsFound     Int        @default(0) @map("results_found")
-  qualifiedResults Int        @default(0) @map("qualified_results")
-  responses        Int        @default(0)
-  conversions      Int        @default(0)
-  createdAt        DateTime   @default(now()) @map("created_at")
-  updatedAt        DateTime   @updatedAt @map("updated_at")
-  workspace        Workspace  @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  id                  String              @id @default(uuid()) @db.Uuid
+  workspaceId         String              @map("workspace_id") @db.Uuid
+  source              LeadSource
+  query               String
+  enabled             Boolean             @default(true)
+  priority            Int                 @default(0)
+  country             String?
+  category            String              @default("CUSTOM")
+  lastRun             DateTime?           @map("last_run")
+  lastRunAt           DateTime?           @map("last_run_at")
+  lastResultCount     Int                 @default(0) @map("last_result_count")
+  totalResults        Int                 @default(0) @map("total_results")
+  relevantResults     Int                 @default(0) @map("relevant_results")
+  prequalifiedResults Int                 @default(0) @map("prequalified_results")
+  uniqueCompanies     Int                 @default(0) @map("unique_companies")
+  shortlisted         Int                 @default(0)
+  manualActions       Int                 @default(0) @map("manual_actions")
+  qualityScore        Int                 @default(0) @map("quality_score")
+  lowPerformance      Boolean             @default(false) @map("low_performance")
+  resultsFound        Int                 @default(0) @map("results_found")
+  qualifiedResults    Int                 @default(0) @map("qualified_results")
+  responses           Int                 @default(0)
+  conversions         Int                 @default(0)
+  createdAt           DateTime            @default(now()) @map("created_at")
+  updatedAt           DateTime            @updatedAt @map("updated_at")
+  workspace           Workspace           @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  rawLeads            RawLead[]
+  leads               Lead[]
+  signals             LeadSignal[]
+  discoveryQueryRuns  DiscoveryQueryRun[]
 
   @@unique([workspaceId, source, query])
   @@map("search_queries")
 }
 
 model Campaign {
-  id             String            @id @default(uuid()) @db.Uuid
-  workspaceId    String            @map("workspace_id") @db.Uuid
-  name           String
-  status         String            @default("DRAFT")
-  minimumScore   Int               @default(82) @map("minimum_score")
-  shortlistLimit Int               @default(20) @map("shortlist_limit")
-  emailMode      String            @default("DRAFT_FIRST") @map("email_mode")
-  followUpDays   Int               @default(7) @map("follow_up_days")
-  maxFollowUps   Int               @default(1) @map("max_follow_ups")
-  targeting      Json              @default("{}")
-  createdAt      DateTime          @default(now()) @map("created_at")
-  updatedAt      DateTime          @updatedAt @map("updated_at")
-  workspace      Workspace         @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
-  outreach       OutreachMessage[]
+  id                String            @id @default(uuid()) @db.Uuid
+  workspaceId       String            @map("workspace_id") @db.Uuid
+  name              String
+  strategy          String            @default("AGENCY_PARTNERSHIP")
+  status            String            @default("DRAFT")
+  minimumScore      Int               @default(82) @map("minimum_score")
+  shortlistLimit    Int               @default(20) @map("shortlist_limit")
+  weeklyLimit       Int               @default(20) @map("weekly_limit")
+  emailMode         String            @default("DRAFT_FIRST") @map("email_mode")
+  autoSendEnabled   Boolean           @default(false) @map("auto_send_enabled")
+  autoSendThreshold Int               @default(92) @map("auto_send_threshold")
+  followUpDays      Int               @default(7) @map("follow_up_days")
+  followUpMode      String            @default("DRAFT") @map("follow_up_mode")
+  maxFollowUps      Int               @default(1) @map("max_follow_ups")
+  targeting         Json              @default("{}")
+  createdAt         DateTime          @default(now()) @map("created_at")
+  updatedAt         DateTime          @updatedAt @map("updated_at")
+  workspace         Workspace         @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  outreach          OutreachMessage[]
 
   @@index([workspaceId, status])
   @@map("campaigns")
 }
 
 model OutreachMessage {
-  id             String          @id @default(uuid()) @db.Uuid
-  workspaceId    String          @map("workspace_id") @db.Uuid
-  leadId         String          @map("lead_id") @db.Uuid
-  campaignId     String?         @map("campaign_id") @db.Uuid
-  channel        OutreachChannel
-  messageType    String          @map("message_type")
-  subject        String?
-  body           String
-  status         OutreachStatus  @default(GENERATED)
-  gmailMessageId String?         @map("gmail_message_id")
-  gmailThreadId  String?         @map("gmail_thread_id")
-  sentAt         DateTime?       @map("sent_at")
-  createdAt      DateTime        @default(now()) @map("created_at")
-  updatedAt      DateTime        @updatedAt @map("updated_at")
-  workspace      Workspace       @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
-  lead           Lead            @relation(fields: [leadId], references: [id], onDelete: Cascade)
-  campaign       Campaign?       @relation(fields: [campaignId], references: [id], onDelete: SetNull)
-  replies        EmailReply[]
+  id                       String                 @id @default(uuid()) @db.Uuid
+  workspaceId              String                 @map("workspace_id") @db.Uuid
+  leadId                   String                 @map("lead_id") @db.Uuid
+  contactId                String?                @map("contact_id") @db.Uuid
+  campaignId               String?                @map("campaign_id") @db.Uuid
+  followUpToId             String?                @map("follow_up_to_id") @db.Uuid
+  channel                  OutreachChannel
+  strategy                 String                 @default("AGENCY_PARTNERSHIP")
+  messageType              String                 @map("message_type")
+  subject                  String?
+  body                     String
+  originalGeneratedSubject String?                @map("original_generated_subject")
+  originalGeneratedBody    String?                @map("original_generated_body")
+  personalizationPoints    Json                   @default("[]") @map("personalization_points")
+  confidence               Int                    @default(0)
+  approvalStatus           OutreachApprovalStatus @default(PENDING) @map("approval_status")
+  status                   OutreachStatus         @default(GENERATED)
+  gmailDraftId             String?                @map("gmail_draft_id")
+  gmailMessageId           String?                @map("gmail_message_id")
+  gmailThreadId            String?                @map("gmail_thread_id")
+  gmailHeaderMessageId     String?                @map("gmail_header_message_id")
+  generatedByModel         String?                @map("generated_by_model")
+  promptVersion            String?                @map("prompt_version")
+  idempotencyKey           String?                @map("idempotency_key")
+  generatedAt              DateTime?              @map("generated_at")
+  approvedAt               DateTime?              @map("approved_at")
+  sentAt                   DateTime?              @map("sent_at")
+  repliedAt                DateTime?              @map("replied_at")
+  followUpNumber           Int                    @default(0) @map("follow_up_number")
+  failureReason            String?                @map("failure_reason")
+  createdAt                DateTime               @default(now()) @map("created_at")
+  updatedAt                DateTime               @updatedAt @map("updated_at")
+  workspace                Workspace              @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  lead                     Lead                   @relation(fields: [leadId], references: [id], onDelete: Cascade)
+  contact                  Contact?               @relation(fields: [contactId], references: [id], onDelete: SetNull)
+  campaign                 Campaign?              @relation(fields: [campaignId], references: [id], onDelete: SetNull)
+  followUpTo               OutreachMessage?       @relation("OutreachFollowUps", fields: [followUpToId], references: [id], onDelete: SetNull)
+  followUps                OutreachMessage[]      @relation("OutreachFollowUps")
+  replies                  EmailReply[]
 
+  @@unique([workspaceId, idempotencyKey])
   @@index([workspaceId, status])
+  @@index([workspaceId, contactId])
+  @@index([workspaceId, gmailThreadId])
+  @@index([workspaceId, sentAt])
   @@map("outreach_messages")
 }
 
@@ -501,15 +668,34 @@ model EmailReply {
   id                String          @id @default(uuid()) @db.Uuid
   workspaceId       String          @map("workspace_id") @db.Uuid
   outreachMessageId String          @map("outreach_message_id") @db.Uuid
+  leadId            String?         @map("lead_id") @db.Uuid
+  contactId         String?         @map("contact_id") @db.Uuid
   gmailMessageId    String?         @map("gmail_message_id")
+  gmailThreadId     String?         @map("gmail_thread_id")
+  fromEmail         String?         @map("from_email")
+  toEmail           String?         @map("to_email")
+  subject           String?
   body              String
+  bodyText          String?         @map("body_text")
   classification    String?
+  sentiment         String?
+  summary           String?
+  recommendedAction String?         @map("recommended_action")
+  requiresResponse  Boolean         @default(false) @map("requires_response")
+  meetingRequested  Boolean         @default(false) @map("meeting_requested")
+  aiConfidence      Int             @default(0) @map("ai_confidence")
   receivedAt        DateTime        @map("received_at")
   createdAt         DateTime        @default(now()) @map("created_at")
+  updatedAt         DateTime        @updatedAt @map("updated_at")
   workspace         Workspace       @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
   outreachMessage   OutreachMessage @relation(fields: [outreachMessageId], references: [id], onDelete: Cascade)
+  lead              Lead?           @relation(fields: [leadId], references: [id], onDelete: SetNull)
+  contact           Contact?        @relation(fields: [contactId], references: [id], onDelete: SetNull)
 
+  @@unique([workspaceId, gmailMessageId])
   @@index([workspaceId, receivedAt])
+  @@index([workspaceId, classification])
+  @@index([workspaceId, gmailThreadId])
   @@map("email_replies")
 }
 
@@ -529,20 +715,32 @@ model Activity {
 }
 
 model ActionItem {
-  id          String       @id @default(uuid()) @db.Uuid
-  workspaceId String       @map("workspace_id") @db.Uuid
-  leadId      String?      @map("lead_id") @db.Uuid
-  type        String
-  title       String
-  content     String?
-  status      ActionStatus @default(PENDING)
-  dueAt       DateTime?    @map("due_at")
-  createdAt   DateTime     @default(now()) @map("created_at")
-  updatedAt   DateTime     @updatedAt @map("updated_at")
-  workspace   Workspace    @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
-  lead        Lead?        @relation(fields: [leadId], references: [id], onDelete: Cascade)
+  id            String       @id @default(uuid()) @db.Uuid
+  workspaceId   String       @map("workspace_id") @db.Uuid
+  leadId        String?      @map("lead_id") @db.Uuid
+  contactId     String?      @map("contact_id") @db.Uuid
+  platform      LeadSource?
+  actionType    String?      @map("action_type")
+  type          String
+  title         String
+  content       String?
+  suggestedText String?      @map("suggested_text")
+  sourceUrl     String?      @map("source_url")
+  profileUrl    String?      @map("profile_url")
+  status        ActionStatus @default(PENDING)
+  dueAt         DateTime?    @map("due_at")
+  expiresAt     DateTime?    @map("expires_at")
+  completedAt   DateTime?    @map("completed_at")
+  stale         Boolean      @default(false)
+  createdAt     DateTime     @default(now()) @map("created_at")
+  updatedAt     DateTime     @updatedAt @map("updated_at")
+  workspace     Workspace    @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  lead          Lead?        @relation(fields: [leadId], references: [id], onDelete: Cascade)
+  contact       Contact?     @relation(fields: [contactId], references: [id], onDelete: SetNull)
 
   @@index([workspaceId, status])
+  @@index([workspaceId, platform])
+  @@index([workspaceId, expiresAt])
   @@map("action_queue")
 }
 
@@ -553,12 +751,15 @@ model SuppressionEntry {
   domain      String?
   contactId   String?   @map("contact_id") @db.Uuid
   reason      String
+  source      String    @default("MANUAL")
   createdAt   DateTime  @default(now()) @map("created_at")
+  updatedAt   DateTime  @updatedAt @map("updated_at")
   workspace   Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
   contact     Contact?  @relation(fields: [contactId], references: [id], onDelete: SetNull)
 
   @@index([workspaceId, email])
   @@index([workspaceId, domain])
+  @@index([workspaceId, contactId])
   @@map("suppression_list")
 }
 
@@ -583,16 +784,24 @@ model SourceStatistic {
 }
 
 model IntegrationConnection {
-  id                    String            @id @default(uuid()) @db.Uuid
-  workspaceId           String            @map("workspace_id") @db.Uuid
-  provider              String
-  status                IntegrationStatus @default(NOT_CONFIGURED)
-  encryptedCredentials  String?           @map("encrypted_credentials")
-  lastSuccessfulRequest DateTime?         @map("last_successful_request")
-  lastError             String?           @map("last_error")
-  createdAt             DateTime          @default(now()) @map("created_at")
-  updatedAt             DateTime          @updatedAt @map("updated_at")
-  workspace             Workspace         @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  id                            String            @id @default(uuid()) @db.Uuid
+  workspaceId                   String            @map("workspace_id") @db.Uuid
+  provider                      String
+  status                        IntegrationStatus @default(NOT_CONFIGURED)
+  accountIdentifier             String?           @map("account_identifier")
+  encryptedCredentials          String?           @map("encrypted_credentials")
+  encryptedCredentialsReference String?           @map("encrypted_credentials_reference")
+  scopes                        Json              @default("[]")
+  connectedAt                   DateTime?         @map("connected_at")
+  lastSuccessfulAt              DateTime?         @map("last_successful_at")
+  lastSuccessfulRequest         DateTime?         @map("last_successful_request")
+  lastErrorAt                   DateTime?         @map("last_error_at")
+  lastError                     String?           @map("last_error")
+  lastGmailSyncAt               DateTime?         @map("last_gmail_sync_at")
+  gmailHistoryId                String?           @map("gmail_history_id")
+  createdAt                     DateTime          @default(now()) @map("created_at")
+  updatedAt                     DateTime          @updatedAt @map("updated_at")
+  workspace                     Workspace         @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
 
   @@unique([workspaceId, provider])
   @@map("integration_connections")
@@ -623,19 +832,127 @@ model SystemJob {
 }
 
 model AutomationRule {
-  id          String    @id @default(uuid()) @db.Uuid
-  workspaceId String    @map("workspace_id") @db.Uuid
-  name        String
-  type        String
-  enabled     Boolean   @default(false)
-  schedule    String?
-  config      Json      @default("{}")
-  createdAt   DateTime  @default(now()) @map("created_at")
-  updatedAt   DateTime  @updatedAt @map("updated_at")
-  workspace   Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  id             String          @id @default(uuid()) @db.Uuid
+  workspaceId    String          @map("workspace_id") @db.Uuid
+  name           String
+  type           String
+  enabled        Boolean         @default(false)
+  schedule       String?
+  scheduleType   String          @default("CRON") @map("schedule_type")
+  timezone       String          @default("UTC")
+  cronExpression String?         @map("cron_expression")
+  configuration  Json            @default("{}")
+  config         Json            @default("{}")
+  skipNextAt     DateTime?       @map("skip_next_at")
+  lastRunAt      DateTime?       @map("last_run_at")
+  nextRunAt      DateTime?       @map("next_run_at")
+  lastRunStatus  String?         @map("last_run_status")
+  lastError      String?         @map("last_error")
+  createdAt      DateTime        @default(now()) @map("created_at")
+  updatedAt      DateTime        @updatedAt @map("updated_at")
+  workspace      Workspace       @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  runs           AutomationRun[]
 
   @@unique([workspaceId, type])
+  @@index([workspaceId, enabled, nextRunAt])
   @@map("automation_rules")
+}
+
+model AutomationRun {
+  id               String          @id @default(uuid()) @db.Uuid
+  workspaceId      String          @map("workspace_id") @db.Uuid
+  automationRuleId String          @map("automation_rule_id") @db.Uuid
+  scheduledFor     DateTime        @map("scheduled_for")
+  scheduledPeriod  String          @map("scheduled_period")
+  startedAt        DateTime?       @map("started_at")
+  completedAt      DateTime?       @map("completed_at")
+  status           String          @default("SCHEDULED")
+  jobId            String?         @map("job_id") @db.Uuid
+  previousRunId    String?         @map("previous_run_id") @db.Uuid
+  summary          Json            @default("{}")
+  error            String?
+  createdAt        DateTime        @default(now()) @map("created_at")
+  workspace        Workspace       @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  automationRule   AutomationRule  @relation(fields: [automationRuleId], references: [id], onDelete: Cascade)
+  previousRun      AutomationRun?  @relation("AutomationRunRetries", fields: [previousRunId], references: [id], onDelete: SetNull)
+  retries          AutomationRun[] @relation("AutomationRunRetries")
+
+  @@unique([workspaceId, automationRuleId, scheduledPeriod])
+  @@index([workspaceId, status])
+  @@index([workspaceId, scheduledFor])
+  @@map("automation_runs")
+}
+
+model OptimizationRecommendation {
+  id          String    @id @default(uuid()) @db.Uuid
+  workspaceId String    @map("workspace_id") @db.Uuid
+  type        String
+  title       String
+  description String
+  evidence    Json      @default("{}")
+  status      String    @default("NEW")
+  createdAt   DateTime  @default(now()) @map("created_at")
+  resolvedAt  DateTime? @map("resolved_at")
+  workspace   Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+
+  @@index([workspaceId, status])
+  @@index([workspaceId, type])
+  @@map("optimization_recommendations")
+}
+
+model LeadFeedback {
+  id          String    @id @default(uuid()) @db.Uuid
+  workspaceId String    @map("workspace_id") @db.Uuid
+  leadId      String    @map("lead_id") @db.Uuid
+  rating      String
+  reason      String?
+  notes       String?
+  createdBy   String?   @map("created_by") @db.Uuid
+  createdAt   DateTime  @default(now()) @map("created_at")
+  workspace   Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  lead        Lead      @relation(fields: [leadId], references: [id], onDelete: Cascade)
+  creator     User?     @relation(fields: [createdBy], references: [id], onDelete: SetNull)
+
+  @@index([workspaceId, leadId])
+  @@index([workspaceId, rating])
+  @@map("lead_feedback")
+}
+
+model Notification {
+  id          String    @id @default(uuid()) @db.Uuid
+  workspaceId String    @map("workspace_id") @db.Uuid
+  userId      String?   @map("user_id") @db.Uuid
+  type        String
+  title       String
+  message     String
+  entityType  String?   @map("entity_type")
+  entityId    String?   @map("entity_id")
+  readAt      DateTime? @map("read_at")
+  createdAt   DateTime  @default(now()) @map("created_at")
+  workspace   Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  user        User?     @relation(fields: [userId], references: [id], onDelete: SetNull)
+
+  @@index([workspaceId, readAt])
+  @@index([workspaceId, createdAt])
+  @@map("notifications")
+}
+
+model WeeklyReport {
+  id                String    @id @default(uuid()) @db.Uuid
+  workspaceId       String    @map("workspace_id") @db.Uuid
+  weekStart         DateTime  @map("week_start")
+  weekEnd           DateTime  @map("week_end")
+  metrics           Json      @default("{}")
+  sourcePerformance Json      @default("{}") @map("source_performance")
+  queryPerformance  Json      @default("{}") @map("query_performance")
+  recommendations   Json      @default("[]")
+  failures          Json      @default("[]")
+  generatedAt       DateTime  @default(now()) @map("generated_at")
+  workspace         Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+
+  @@unique([workspaceId, weekStart])
+  @@index([workspaceId, generatedAt])
+  @@map("weekly_reports")
 }
 
 model AuditLog {
@@ -655,21 +972,42 @@ model AuditLog {
 }
 
 model UserSettings {
-  id                String    @id @default(uuid()) @db.Uuid
-  workspaceId       String    @unique @map("workspace_id") @db.Uuid
-  profile           Json      @default("{}")
-  targeting         Json      @default("{}")
-  scoring           Json      @default("{}")
-  discovery         Json      @default("{}")
-  outreachPaused    Boolean   @default(false) @map("outreach_paused")
-  emailMode         String    @default("DRAFT_FIRST") @map("email_mode")
-  weeklyEmailLimit  Int       @default(20) @map("weekly_email_limit")
-  followUpDelayDays Int       @default(7) @map("follow_up_delay_days")
-  maxFollowUps      Int       @default(1) @map("max_follow_ups")
-  emailSignature    String?   @map("email_signature")
-  createdAt         DateTime  @default(now()) @map("created_at")
-  updatedAt         DateTime  @updatedAt @map("updated_at")
-  workspace         Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  id                                String    @id @default(uuid()) @db.Uuid
+  workspaceId                       String    @unique @map("workspace_id") @db.Uuid
+  profile                           Json      @default("{}")
+  targeting                         Json      @default("{}")
+  scoring                           Json      @default("{}")
+  discovery                         Json      @default("{}")
+  outreachPaused                    Boolean   @default(false) @map("outreach_paused")
+  emailMode                         String    @default("DRAFT_FIRST") @map("email_mode")
+  weeklyEmailLimit                  Int       @default(20) @map("weekly_email_limit")
+  autoSendEnabled                   Boolean   @default(false) @map("auto_send_enabled")
+  autoSendMinimumScore              Int       @default(92) @map("auto_send_minimum_score")
+  autoSendDailyLimit                Int       @default(5) @map("auto_send_daily_limit")
+  autoGenerateOutreachDrafts        Boolean   @default(true) @map("auto_generate_outreach_drafts")
+  automationPaused                  Boolean   @default(false) @map("automation_paused")
+  automationKillSwitch              Boolean   @default(false) @map("automation_kill_switch")
+  timezone                          String    @default("UTC")
+  outreachBusinessHoursStart        String    @default("09:00") @map("outreach_business_hours_start")
+  outreachBusinessHoursEnd          String    @default("17:00") @map("outreach_business_hours_end")
+  outreachBusinessDays              Json      @default("[1,2,3,4,5]") @map("outreach_business_days")
+  sourcePriorities                  Json      @default("{}") @map("source_priorities")
+  discoveryBudgetAllocation         Json      @default("{}") @map("discovery_budget_allocation")
+  optimizationSettings              Json      @default("{}") @map("optimization_settings")
+  staleLeadTtls                     Json      @default("{}") @map("stale_lead_ttls")
+  sendOwnerEmailAlerts              Boolean   @default(false) @map("send_owner_email_alerts")
+  dailyDigestEnabled                Boolean   @default(true) @map("daily_digest_enabled")
+  scoreJumpThreshold                Int       @default(10) @map("score_jump_threshold")
+  followUpDelayDays                 Int       @default(7) @map("follow_up_delay_days")
+  followUpMode                      String    @default("DRAFT") @map("follow_up_mode")
+  maxFollowUps                      Int       @default(1) @map("max_follow_ups")
+  coldOutreachCooldownDays          Int       @default(90) @map("cold_outreach_cooldown_days")
+  maxNewContactsPerCompanyPer30Days Int       @default(1) @map("max_new_contacts_per_company_per_30_days")
+  emailSignature                    String?   @map("email_signature")
+  optOutFooter                      String?   @map("opt_out_footer")
+  createdAt                         DateTime  @default(now()) @map("created_at")
+  updatedAt                         DateTime  @updatedAt @map("updated_at")
+  workspace                         Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
 
   @@map("user_settings")
 }
@@ -693,14 +1031,223 @@ model AiUsageLog {
   @@map("ai_usage_logs")
 }
 
+model WorkerHeartbeat {
+  id              String   @id @default(uuid()) @db.Uuid
+  workerId        String   @unique @map("worker_id")
+  service         String   @default("worker")
+  version         String
+  status          String   @default("HEALTHY")
+  queues          Json     @default("[]")
+  metadata        Json     @default("{}")
+  lastHeartbeatAt DateTime @default(now()) @map("last_heartbeat_at")
+  createdAt       DateTime @default(now()) @map("created_at")
+  updatedAt       DateTime @updatedAt @map("updated_at")
+
+  @@index([lastHeartbeatAt])
+  @@map("worker_heartbeats")
+}
+
+model DiscoveryRun {
+  id                String              @id @default(uuid()) @db.Uuid
+  workspaceId       String              @map("workspace_id") @db.Uuid
+  systemJobId       String?             @map("system_job_id") @db.Uuid
+  name              String
+  status            JobStatus           @default(QUEUED)
+  sources           Json                @default("[]")
+  countries         Json                @default("[]")
+  categories        Json                @default("[]")
+  maxQueries        Int                 @default(50) @map("max_queries")
+  maxDiscoveries    Int                 @default(200) @map("max_discoveries")
+  minimumScore      Int                 @default(82) @map("minimum_score")
+  shortlistLimit    Int                 @default(20) @map("shortlist_limit")
+  rawResults        Int                 @default(0) @map("raw_results")
+  relevantResults   Int                 @default(0) @map("relevant_results")
+  uniqueCompanies   Int                 @default(0) @map("unique_companies")
+  duplicatesRemoved Int                 @default(0) @map("duplicates_removed")
+  companiesAnalyzed Int                 @default(0) @map("companies_analyzed")
+  contactsFound     Int                 @default(0) @map("contacts_found")
+  emailsVerified    Int                 @default(0) @map("emails_verified")
+  leadsScored       Int                 @default(0) @map("leads_scored")
+  qualified         Int                 @default(0)
+  shortlisted       Int                 @default(0)
+  errors            Json                @default("[]")
+  startedAt         DateTime?           @map("started_at")
+  completedAt       DateTime?           @map("completed_at")
+  createdAt         DateTime            @default(now()) @map("created_at")
+  updatedAt         DateTime            @updatedAt @map("updated_at")
+  workspace         Workspace           @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  rawLeads          RawLead[]
+  leads             Lead[]
+  signals           LeadSignal[]
+  queryRuns         DiscoveryQueryRun[]
+  shortlists        Shortlist[]
+
+  @@index([workspaceId, status])
+  @@index([workspaceId, createdAt])
+  @@map("discovery_runs")
+}
+
+model DiscoveryQueryRun {
+  id                   String       @id @default(uuid()) @db.Uuid
+  workspaceId          String       @map("workspace_id") @db.Uuid
+  leadHuntId           String       @map("lead_hunt_id") @db.Uuid
+  searchQueryId        String?      @map("search_query_id") @db.Uuid
+  query                String
+  country              String?
+  category             String?
+  provider             String
+  resultsFound         Int          @default(0) @map("results_found")
+  relevantResults      Int          @default(0) @map("relevant_results")
+  duplicateResults     Int          @default(0) @map("duplicate_results")
+  prequalifiedResults  Int          @default(0) @map("prequalified_results")
+  enrichedResults      Int          @default(0) @map("enriched_results")
+  scoredResults        Int          @default(0) @map("scored_results")
+  manualActions        Int          @default(0) @map("manual_actions")
+  uniqueCompanies      Int          @default(0) @map("unique_companies")
+  qualifiedCompanies   Int          @default(0) @map("qualified_companies")
+  shortlistedCompanies Int          @default(0) @map("shortlisted_companies")
+  status               JobStatus    @default(QUEUED)
+  error                String?
+  startedAt            DateTime?    @map("started_at")
+  completedAt          DateTime?    @map("completed_at")
+  createdAt            DateTime     @default(now()) @map("created_at")
+  workspace            Workspace    @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  leadHunt             DiscoveryRun @relation(fields: [leadHuntId], references: [id], onDelete: Cascade)
+  searchQuery          SearchQuery? @relation(fields: [searchQueryId], references: [id], onDelete: SetNull)
+
+  @@index([workspaceId, leadHuntId])
+  @@index([workspaceId, searchQueryId])
+  @@map("discovery_query_runs")
+}
+
+model Shortlist {
+  id             String          @id @default(uuid()) @db.Uuid
+  workspaceId    String          @map("workspace_id") @db.Uuid
+  discoveryRunId String?         @map("discovery_run_id") @db.Uuid
+  name           String
+  weekStart      DateTime        @map("week_start")
+  weekEnd        DateTime        @map("week_end")
+  minimumScore   Int             @map("minimum_score")
+  maximumItems   Int             @map("maximum_items")
+  createdAt      DateTime        @default(now()) @map("created_at")
+  workspace      Workspace       @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  discoveryRun   DiscoveryRun?   @relation(fields: [discoveryRunId], references: [id], onDelete: SetNull)
+  items          ShortlistItem[]
+
+  @@index([workspaceId, weekStart])
+  @@map("shortlists")
+}
+
+model ShortlistItem {
+  id               String    @id @default(uuid()) @db.Uuid
+  shortlistId      String    @map("shortlist_id") @db.Uuid
+  leadId           String    @map("lead_id") @db.Uuid
+  rank             Int
+  scoreAtSelection Int       @map("score_at_selection")
+  rankingScore     Int       @default(0) @map("ranking_score")
+  rankReason       Json      @default("[]") @map("rank_reason")
+  status           String    @default("PENDING")
+  rejectionReason  String?   @map("rejection_reason")
+  createdAt        DateTime  @default(now()) @map("created_at")
+  shortlist        Shortlist @relation(fields: [shortlistId], references: [id], onDelete: Cascade)
+  lead             Lead      @relation(fields: [leadId], references: [id], onDelete: Cascade)
+
+  @@unique([shortlistId, leadId])
+  @@index([leadId])
+  @@map("shortlist_items")
+}
+
+model ContactEnrichmentRecord {
+  id              String    @id @default(uuid()) @db.Uuid
+  workspaceId     String    @map("workspace_id") @db.Uuid
+  companyId       String    @map("company_id") @db.Uuid
+  provider        String
+  status          String
+  contactsFound   Int       @default(0) @map("contacts_found")
+  requestMetadata Json      @default("{}") @map("request_metadata")
+  error           String?
+  createdAt       DateTime  @default(now()) @map("created_at")
+  workspace       Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  company         Company   @relation(fields: [companyId], references: [id], onDelete: Cascade)
+
+  @@index([workspaceId, companyId])
+  @@map("contact_enrichment_records")
+}
+
+model EmailVerificationRecord {
+  id          String      @id @default(uuid()) @db.Uuid
+  workspaceId String      @map("workspace_id") @db.Uuid
+  contactId   String      @map("contact_id") @db.Uuid
+  email       String
+  provider    String
+  result      EmailStatus
+  confidence  Int         @default(0)
+  verifiedAt  DateTime    @default(now()) @map("verified_at")
+  metadata    Json        @default("{}")
+  workspace   Workspace   @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  contact     Contact     @relation(fields: [contactId], references: [id], onDelete: Cascade)
+
+  @@index([workspaceId, email])
+  @@index([workspaceId, contactId])
+  @@map("email_verification_records")
+}
+
+model SocialProfile {
+  id                   String     @id @default(uuid()) @db.Uuid
+  workspaceId          String     @map("workspace_id") @db.Uuid
+  contactId            String?    @map("contact_id") @db.Uuid
+  platform             LeadSource
+  externalId           String?    @map("external_id")
+  username             String?
+  displayName          String?    @map("display_name")
+  profileUrl           String?    @map("profile_url")
+  authorType           String?    @map("author_type")
+  authorTypeConfidence Int        @default(0) @map("author_type_confidence")
+  metadata             Json       @default("{}")
+  createdAt            DateTime   @default(now()) @map("created_at")
+  updatedAt            DateTime   @updatedAt @map("updated_at")
+  workspace            Workspace  @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  contact              Contact?   @relation(fields: [contactId], references: [id], onDelete: SetNull)
+
+  @@unique([workspaceId, platform, externalId])
+  @@index([workspaceId, platform, username])
+  @@map("social_profiles")
+}
+
+model TelegramSource {
+  id           String    @id @default(uuid()) @db.Uuid
+  workspaceId  String    @map("workspace_id") @db.Uuid
+  externalId   String?   @map("external_id")
+  name         String
+  username     String?
+  type         String
+  enabled      Boolean   @default(true)
+  keywords     Json      @default("[]")
+  notes        String?
+  status       String    @default("NOT_CONFIGURED")
+  lastSyncedAt DateTime? @map("last_synced_at")
+  lastError    String?   @map("last_error")
+  createdAt    DateTime  @default(now()) @map("created_at")
+  updatedAt    DateTime  @updatedAt @map("updated_at")
+  workspace    Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+
+  @@unique([workspaceId, externalId])
+  @@index([workspaceId, enabled])
+  @@map("telegram_sources")
+}
+
 model DeviceToken {
   id          String    @id @default(uuid()) @db.Uuid
   workspaceId String    @map("workspace_id") @db.Uuid
+  userId      String?   @map("user_id") @db.Uuid
   tokenHash   String    @map("token_hash")
+  token       String?
   platform    String
+  enabled     Boolean   @default(true)
   createdAt   DateTime  @default(now()) @map("created_at")
   updatedAt   DateTime  @updatedAt @map("updated_at")
   workspace   Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  user        User?     @relation(fields: [userId], references: [id], onDelete: SetNull)
 
   @@unique([workspaceId, tokenHash])
   @@map("device_tokens")

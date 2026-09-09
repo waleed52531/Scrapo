@@ -51,8 +51,23 @@ const schema = z
     outreachPaused: z.boolean(),
     emailMode: z.enum(["DRAFT_FIRST", "APPROVE_AND_SEND", "AUTOMATIC"]),
     weeklyEmailLimit: z.coerce.number().int().min(0),
+    autoSendEnabled: z.boolean(),
+    autoSendMinimumScore: z.coerce.number().int().min(92).max(100),
+    autoSendDailyLimit: z.coerce.number().int().min(0).max(100),
+    autoGenerateOutreachDrafts: z.boolean(),
+    automationPaused: z.boolean(),
+    automationKillSwitch: z.boolean(),
+    timezone: z.string().min(2),
+    outreachBusinessHoursStart: z.string(),
+    outreachBusinessHoursEnd: z.string(),
+    scoreJumpThreshold: z.coerce.number().int().min(1).max(100),
     followUpDelayDays: z.coerce.number().int().min(1),
+    followUpMode: z.enum(["DRAFT", "OFF"]),
     maxFollowUps: z.coerce.number().int().min(0),
+    coldOutreachCooldownDays: z.coerce.number().int().min(1),
+    maxNewContactsPerCompanyPer30Days: z.coerce.number().int().min(1),
+    emailSignature: z.string(),
+    optOutFooter: z.string(),
   })
   .refine(
     (data) =>
@@ -125,7 +140,7 @@ export default function SettingsPage() {
     <form onSubmit={form.handleSubmit((data) => mutation.mutate(data))}>
       <PageHeader
         title="Settings"
-        description="Editable profile, targeting, scoring, and Phase 1 safeguards."
+        description="Editable profile, targeting, scoring, outreach safeguards, and Phase 6 automation controls."
         action={
           <Button disabled={mutation.isPending || !form.formState.isDirty}>
             <Save className="h-4 w-4" />
@@ -245,7 +260,7 @@ export default function SettingsPage() {
         </Section>
         <Section
           title="Email safeguards"
-          description="No Gmail or outreach execution exists in Phase 1; these settings prepare backend enforcement."
+          description="Auto-send is off by default and remains guarded by verification, scores, limits, and business hours."
         >
           <Grid>
             <Field label="Email mode">
@@ -261,12 +276,84 @@ export default function SettingsPage() {
             <Field label="Weekly limit">
               <Input type="number" {...form.register("weeklyEmailLimit")} />
             </Field>
+            <Field label="Auto-send minimum score">
+              <Input type="number" {...form.register("autoSendMinimumScore")} />
+            </Field>
+            <Field label="Auto-send daily limit">
+              <Input type="number" {...form.register("autoSendDailyLimit")} />
+            </Field>
+            <Field label="Business hours start">
+              <Input {...form.register("outreachBusinessHoursStart")} />
+            </Field>
+            <Field label="Business hours end">
+              <Input {...form.register("outreachBusinessHoursEnd")} />
+            </Field>
             <Field label="Follow-up delay (days)">
               <Input type="number" {...form.register("followUpDelayDays")} />
+            </Field>
+            <Field label="Follow-up mode">
+              <select
+                className="h-10 w-full rounded-md border border-slate-200 bg-white px-3 text-sm"
+                {...form.register("followUpMode")}
+              >
+                <option>DRAFT</option>
+                <option>OFF</option>
+              </select>
             </Field>
             <Field label="Maximum follow-ups">
               <Input type="number" {...form.register("maxFollowUps")} />
             </Field>
+            <Field label="Cooldown days">
+              <Input
+                type="number"
+                {...form.register("coldOutreachCooldownDays")}
+              />
+            </Field>
+            <Field label="Contacts/company per 30 days">
+              <Input
+                type="number"
+                {...form.register("maxNewContactsPerCompanyPer30Days")}
+              />
+            </Field>
+            <Field label="Email signature" wide>
+              <Input {...form.register("emailSignature")} />
+            </Field>
+            <Field label="Opt-out footer" wide>
+              <Input {...form.register("optOutFooter")} />
+            </Field>
+            <label className="flex items-center gap-3 rounded-lg border border-amber-200 bg-amber-50 p-4 sm:col-span-2">
+              <input
+                type="checkbox"
+                className="h-4 w-4"
+                {...form.register("autoSendEnabled")}
+              />
+              <span>
+                <span className="block text-sm font-semibold text-amber-900">
+                  Enable automatic cold outreach
+                </span>
+                <span className="block text-xs text-amber-700">
+                  Off by default. Requires verified email, score ≥ 92, high
+                  confidence, business hours, daily limits, and all eligibility
+                  checks.
+                </span>
+              </span>
+            </label>
+            <label className="flex items-center gap-3 rounded-lg border border-blue-200 bg-blue-50 p-4 sm:col-span-2">
+              <input
+                type="checkbox"
+                className="h-4 w-4"
+                {...form.register("autoGenerateOutreachDrafts")}
+              />
+              <span>
+                <span className="block text-sm font-semibold text-blue-900">
+                  Auto-generate safe email drafts
+                </span>
+                <span className="block text-xs text-blue-700">
+                  Creates drafts for shortlist review. It does not send
+                  messages.
+                </span>
+              </span>
+            </label>
             <label className="flex items-center gap-3 rounded-lg border border-red-200 bg-red-50 p-4 sm:col-span-2">
               <input
                 type="checkbox"
@@ -279,6 +366,50 @@ export default function SettingsPage() {
                 </span>
                 <span className="block text-xs text-red-700">
                   Stored as an emergency backend control for later phases.
+                </span>
+              </span>
+            </label>
+          </Grid>
+        </Section>
+        <Section
+          title="Automation controls"
+          description="Global scheduler controls for Phase 6 background jobs."
+        >
+          <Grid>
+            <Field label="Timezone">
+              <Input {...form.register("timezone")} />
+            </Field>
+            <Field label="Score jump alert threshold">
+              <Input type="number" {...form.register("scoreJumpThreshold")} />
+            </Field>
+            <label className="flex items-center gap-3 rounded-lg border border-amber-200 bg-amber-50 p-4 sm:col-span-2">
+              <input
+                type="checkbox"
+                className="h-4 w-4"
+                {...form.register("automationPaused")}
+              />
+              <span>
+                <span className="block text-sm font-semibold text-amber-900">
+                  Pause automation scheduler
+                </span>
+                <span className="block text-xs text-amber-700">
+                  Stops scheduled runs without deleting rules or history.
+                </span>
+              </span>
+            </label>
+            <label className="flex items-center gap-3 rounded-lg border border-red-200 bg-red-50 p-4 sm:col-span-2">
+              <input
+                type="checkbox"
+                className="h-4 w-4"
+                {...form.register("automationKillSwitch")}
+              />
+              <span>
+                <span className="block text-sm font-semibold text-red-900">
+                  Automation kill switch
+                </span>
+                <span className="block text-xs text-red-700">
+                  Emergency stop for all automation runs. Resume from the
+                  Automation page.
                 </span>
               </span>
             </label>
@@ -328,8 +459,23 @@ const defaults: FormValues = {
   outreachPaused: false,
   emailMode: "DRAFT_FIRST",
   weeklyEmailLimit: 20,
+  autoSendEnabled: false,
+  autoSendMinimumScore: 92,
+  autoSendDailyLimit: 5,
+  autoGenerateOutreachDrafts: true,
+  automationPaused: false,
+  automationKillSwitch: false,
+  timezone: "Asia/Karachi",
+  outreachBusinessHoursStart: "09:00",
+  outreachBusinessHoursEnd: "17:00",
+  scoreJumpThreshold: 10,
   followUpDelayDays: 7,
+  followUpMode: "DRAFT",
   maxFollowUps: 1,
+  coldOutreachCooldownDays: 90,
+  maxNewContactsPerCompanyPer30Days: 1,
+  emailSignature: "",
+  optOutFooter: "",
 };
 function split(value: string) {
   return value
@@ -368,8 +514,24 @@ function toForm(settings: WorkspaceSettings): FormValues {
     outreachPaused: settings.outreachPaused,
     emailMode: settings.emailMode as FormValues["emailMode"],
     weeklyEmailLimit: settings.weeklyEmailLimit,
+    autoSendEnabled: settings.autoSendEnabled,
+    autoSendMinimumScore: settings.autoSendMinimumScore,
+    autoSendDailyLimit: settings.autoSendDailyLimit,
+    autoGenerateOutreachDrafts: settings.autoGenerateOutreachDrafts,
+    automationPaused: settings.automationPaused,
+    automationKillSwitch: settings.automationKillSwitch,
+    timezone: settings.timezone,
+    outreachBusinessHoursStart: settings.outreachBusinessHoursStart,
+    outreachBusinessHoursEnd: settings.outreachBusinessHoursEnd,
+    scoreJumpThreshold: settings.scoreJumpThreshold,
     followUpDelayDays: settings.followUpDelayDays,
+    followUpMode: settings.followUpMode as FormValues["followUpMode"],
     maxFollowUps: settings.maxFollowUps,
+    coldOutreachCooldownDays: settings.coldOutreachCooldownDays,
+    maxNewContactsPerCompanyPer30Days:
+      settings.maxNewContactsPerCompanyPer30Days,
+    emailSignature: settings.emailSignature ?? "",
+    optOutFooter: settings.optOutFooter ?? "",
   };
 }
 function toApi(data: FormValues) {
@@ -415,8 +577,23 @@ function toApi(data: FormValues) {
     outreachPaused: data.outreachPaused,
     emailMode: data.emailMode,
     weeklyEmailLimit: data.weeklyEmailLimit,
+    autoSendEnabled: data.autoSendEnabled,
+    autoSendMinimumScore: data.autoSendMinimumScore,
+    autoSendDailyLimit: data.autoSendDailyLimit,
+    autoGenerateOutreachDrafts: data.autoGenerateOutreachDrafts,
+    automationPaused: data.automationPaused,
+    automationKillSwitch: data.automationKillSwitch,
+    timezone: data.timezone,
+    outreachBusinessHoursStart: data.outreachBusinessHoursStart,
+    outreachBusinessHoursEnd: data.outreachBusinessHoursEnd,
+    scoreJumpThreshold: data.scoreJumpThreshold,
     followUpDelayDays: data.followUpDelayDays,
+    followUpMode: data.followUpMode,
     maxFollowUps: data.maxFollowUps,
+    coldOutreachCooldownDays: data.coldOutreachCooldownDays,
+    maxNewContactsPerCompanyPer30Days: data.maxNewContactsPerCompanyPer30Days,
+    emailSignature: data.emailSignature,
+    optOutFooter: data.optOutFooter,
   };
 }
 function Section({

@@ -179,6 +179,28 @@ export class CompaniesService {
     });
   }
 
+  async findContacts(workspaceId: string, userId: string, id: string) {
+    await this.get(workspaceId, id);
+    return this.prisma.$transaction(async (tx) => {
+      await tx.company.update({
+        where: { id },
+        data: { enrichmentStatus: "QUEUED" },
+      });
+      await tx.auditLog.create({
+        data: {
+          workspaceId,
+          actorUserId: userId,
+          action: "COMPANY_CONTACT_DISCOVERY_QUEUED",
+          entityType: "Company",
+          entityId: id,
+        },
+      });
+      return this.analysisQueue.enqueue(workspaceId, "FIND_CONTACTS", {
+        companyId: id,
+      });
+    });
+  }
+
   private toData(input: CreateCompanyDto | UpdateCompanyDto) {
     const domain = input.domain
       ? normalizeDomain(input.domain)

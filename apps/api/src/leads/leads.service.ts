@@ -22,8 +22,13 @@ const listInclude = {
       role: true,
       email: true,
       emailStatus: true,
+      xUrl: true,
+      redditUsername: true,
+      telegramUsername: true,
+      profileUrl: true,
     },
   },
+  _count: { select: { signals: true, actions: true } },
 } satisfies Prisma.LeadInclude;
 
 @Injectable()
@@ -119,6 +124,7 @@ export class LeadsService {
         company: true,
         contact: true,
         signals: { orderBy: { createdAt: "desc" }, include: { rawLead: true } },
+        actions: { orderBy: { createdAt: "desc" }, include: { contact: true } },
         scores: { orderBy: { createdAt: "desc" } },
         activities: { orderBy: { createdAt: "desc" } },
         outreach: {

@@ -4,12 +4,24 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
   Building2,
+  BarChart3,
+  Bell,
+  Bot,
+  ClipboardCheck,
   ContactRound,
+  FileText,
   LayoutDashboard,
   ListFilter,
+  Mail,
+  MailCheck,
+  MessageSquareReply,
+  Megaphone,
+  ShieldCheck,
+  Search,
   Radar,
   Settings,
   Sparkles,
+  Trophy,
   X,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -17,22 +29,34 @@ import { Button } from "@/components/ui/button";
 
 const available = [
   { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
+  { href: "/lead-hunter", label: "Lead Hunter", icon: Radar },
+  { href: "/search-queries", label: "Search Queries", icon: Search },
+  { href: "/action-queue", label: "Action Queue", icon: ClipboardCheck },
+  {
+    href: "/integrations/telegram/sources",
+    label: "Telegram Sources",
+    icon: ContactRound,
+  },
+  { href: "/shortlist", label: "Weekly Shortlist", icon: Trophy },
+  { href: "/automation", label: "Automation", icon: Bot },
+  { href: "/automation/runs", label: "Automation Runs", icon: BarChart3 },
+  { href: "/reports/weekly", label: "Weekly Reports", icon: FileText },
+  { href: "/optimization", label: "Optimization", icon: Sparkles },
+  { href: "/notifications", label: "Notifications", icon: Bell },
+  { href: "/system", label: "System Status", icon: ShieldCheck },
+  { href: "/outreach", label: "Outreach", icon: Mail },
+  { href: "/replies", label: "Replies", icon: MessageSquareReply },
+  { href: "/campaigns", label: "Campaigns", icon: Megaphone },
+  { href: "/integrations/gmail", label: "Gmail", icon: MailCheck },
   { href: "/leads", label: "All Leads", icon: ListFilter },
   { href: "/review", label: "Review Queue", icon: Sparkles },
   { href: "/companies", label: "Companies", icon: Building2 },
   { href: "/contacts", label: "Contacts", icon: ContactRound },
+  { href: "/settings/suppression", label: "Suppression", icon: X },
+  { href: "/settings/usage", label: "Usage & Limits", icon: BarChart3 },
   { href: "/settings", label: "Settings", icon: Settings },
 ];
-const future = [
-  "Lead Hunter",
-  "Weekly Shortlist",
-  "Outreach",
-  "Replies",
-  "Pipeline",
-  "Analytics",
-  "Automation",
-  "Integrations",
-];
+const future = ["Pipeline", "Analytics"];
 
 export function Sidebar({
   open,
@@ -115,9 +139,10 @@ export function Sidebar({
       </nav>
       <div className="border-t border-slate-800 p-4">
         <div className="rounded-lg bg-slate-900 p-3">
-          <p className="text-xs font-semibold text-white">Phase 2</p>
+          <p className="text-xs font-semibold text-white">Phase 7</p>
           <p className="mt-1 text-xs leading-5 text-slate-400">
-            Manual analysis, explainable scoring, and review workflows.
+            Production hardening, system health, launch safety, and
+            deployability.
           </p>
         </div>
       </div>

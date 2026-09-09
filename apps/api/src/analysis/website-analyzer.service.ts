@@ -218,7 +218,7 @@ async function assertPublicHostname(hostname: string) {
 }
 
 function assertPublicHostValue(value: string) {
-  const host = value.toLowerCase();
+  const host = value.toLowerCase().replace(/^\[(.*)]$/, "$1");
   if (
     host === "localhost" ||
     host.endsWith(".localhost") ||

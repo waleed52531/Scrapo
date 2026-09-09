@@ -1,2 +1,2 @@
-import config from '@scrapo/eslint-config/base';
+import config from "@scrapo/eslint-config/base";
 export default config;

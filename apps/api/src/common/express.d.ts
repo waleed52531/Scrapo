@@ -7,7 +7,7 @@ declare global {
         email: string;
         userId: string;
         workspaceId: string;
-        workspaceRole: 'OWNER' | 'ADMIN' | 'MEMBER';
+        workspaceRole: "OWNER" | "ADMIN" | "MEMBER";
       };
     }
   }

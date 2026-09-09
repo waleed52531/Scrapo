@@ -63,6 +63,16 @@ export class CompaniesController {
     return this.companies.analyze(auth.workspaceId, auth.userId, id, input);
   }
 
+  @Post(":id/find-contacts")
+  @HttpCode(202)
+  @ApiOperation({ summary: "Queue public contact discovery for a company" })
+  findContacts(
+    @CurrentAuth() auth: AuthContext,
+    @Param("id", ParseUUIDPipe) id: string,
+  ) {
+    return this.companies.findContacts(auth.workspaceId, auth.userId, id);
+  }
+
   @Patch(":id")
   @ApiOperation({ summary: "Update a company" })
   update(

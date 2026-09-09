@@ -90,14 +90,87 @@ export class SettingsService {
       ...(input.weeklyEmailLimit !== undefined
         ? { weeklyEmailLimit: input.weeklyEmailLimit }
         : {}),
+      ...(input.autoSendEnabled !== undefined
+        ? { autoSendEnabled: input.autoSendEnabled }
+        : {}),
+      ...(input.autoSendMinimumScore !== undefined
+        ? { autoSendMinimumScore: input.autoSendMinimumScore }
+        : {}),
+      ...(input.autoSendDailyLimit !== undefined
+        ? { autoSendDailyLimit: input.autoSendDailyLimit }
+        : {}),
+      ...(input.autoGenerateOutreachDrafts !== undefined
+        ? { autoGenerateOutreachDrafts: input.autoGenerateOutreachDrafts }
+        : {}),
+      ...(input.automationPaused !== undefined
+        ? { automationPaused: input.automationPaused }
+        : {}),
+      ...(input.automationKillSwitch !== undefined
+        ? { automationKillSwitch: input.automationKillSwitch }
+        : {}),
+      ...(input.timezone !== undefined ? { timezone: input.timezone } : {}),
+      ...(input.outreachBusinessHoursStart !== undefined
+        ? { outreachBusinessHoursStart: input.outreachBusinessHoursStart }
+        : {}),
+      ...(input.outreachBusinessHoursEnd !== undefined
+        ? { outreachBusinessHoursEnd: input.outreachBusinessHoursEnd }
+        : {}),
+      ...(input.outreachBusinessDays !== undefined
+        ? {
+            outreachBusinessDays:
+              input.outreachBusinessDays as Prisma.InputJsonValue,
+          }
+        : {}),
+      ...(input.sourcePriorities !== undefined
+        ? { sourcePriorities: input.sourcePriorities as Prisma.InputJsonValue }
+        : {}),
+      ...(input.discoveryBudgetAllocation !== undefined
+        ? {
+            discoveryBudgetAllocation:
+              input.discoveryBudgetAllocation as Prisma.InputJsonValue,
+          }
+        : {}),
+      ...(input.optimizationSettings !== undefined
+        ? {
+            optimizationSettings:
+              input.optimizationSettings as Prisma.InputJsonValue,
+          }
+        : {}),
+      ...(input.staleLeadTtls !== undefined
+        ? { staleLeadTtls: input.staleLeadTtls as Prisma.InputJsonValue }
+        : {}),
+      ...(input.sendOwnerEmailAlerts !== undefined
+        ? { sendOwnerEmailAlerts: input.sendOwnerEmailAlerts }
+        : {}),
+      ...(input.dailyDigestEnabled !== undefined
+        ? { dailyDigestEnabled: input.dailyDigestEnabled }
+        : {}),
+      ...(input.scoreJumpThreshold !== undefined
+        ? { scoreJumpThreshold: input.scoreJumpThreshold }
+        : {}),
       ...(input.followUpDelayDays !== undefined
         ? { followUpDelayDays: input.followUpDelayDays }
+        : {}),
+      ...(input.followUpMode !== undefined
+        ? { followUpMode: input.followUpMode }
         : {}),
       ...(input.maxFollowUps !== undefined
         ? { maxFollowUps: input.maxFollowUps }
         : {}),
+      ...(input.coldOutreachCooldownDays !== undefined
+        ? { coldOutreachCooldownDays: input.coldOutreachCooldownDays }
+        : {}),
+      ...(input.maxNewContactsPerCompanyPer30Days !== undefined
+        ? {
+            maxNewContactsPerCompanyPer30Days:
+              input.maxNewContactsPerCompanyPer30Days,
+          }
+        : {}),
       ...(input.emailSignature !== undefined
         ? { emailSignature: input.emailSignature }
+        : {}),
+      ...(input.optOutFooter !== undefined
+        ? { optOutFooter: input.optOutFooter }
         : {}),
     };
     return this.prisma.$transaction(async (tx) => {

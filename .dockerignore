@@ -1,0 +1,16 @@
+node_modules
+.pnpm-store
+.git
+.next
+dist
+coverage
+playwright-report
+test-results
+.env
+.env.local
+.env.production
+*.log
+*.dump
+*.sql.gz
+backups
+.DS_Store

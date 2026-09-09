@@ -1,8 +1,14 @@
 import { describe, expect, it } from "vitest";
 import {
   calculateLeadScore,
+  classifyDeterministicReply,
+  classifySocialOpportunity,
+  generateDeterministicOutreach,
+  nextDailyRun,
+  nextWeeklyRun,
   normalizeCompanyName,
   normalizeDomain,
+  rankingScoreForLead,
   scoreCountryPriority,
   scoreRecency,
   temperatureForScore,
@@ -100,5 +106,153 @@ describe("normalization", () => {
     expect(scoreCountryPriority("Brazil")).toBe(45);
     expect(scoreRecency(new Date(), "ACTIVE_REQUIREMENT")).toBe(100);
     expect(scoreRecency(null, "AGENCY_PARTNER")).toBe(70);
+  });
+});
+
+describe("Phase 6 automation helpers", () => {
+  it("calculates daily and weekly runs in a timezone-aware way", () => {
+    expect(
+      nextDailyRun({
+        time: "08:00",
+        timezone: "UTC",
+        from: new Date("2026-09-08T06:00:00.000Z"),
+      }).toISOString(),
+    ).toBe("2026-09-08T08:00:00.000Z");
+    expect(
+      nextDailyRun({
+        time: "08:00",
+        timezone: "UTC",
+        from: new Date("2026-09-08T09:00:00.000Z"),
+      }).toISOString(),
+    ).toBe("2026-09-09T08:00:00.000Z");
+    expect(
+      nextWeeklyRun({
+        dayOfWeek: 1,
+        time: "08:00",
+        timezone: "UTC",
+        from: new Date("2026-09-08T06:00:00.000Z"),
+      }).toISOString(),
+    ).toBe("2026-09-14T08:00:00.000Z");
+  });
+
+  it("keeps ranking separate from the base lead score", () => {
+    const result = rankingScoreForLead({
+      overallScore: 90,
+      contactQuality: 80,
+      emailVerified: true,
+      sourcePerformance: 70,
+      queryPerformance: 60,
+      recencyScore: 100,
+      multiSignalConfidence: 85,
+      manualPreference: 100,
+    });
+
+    expect(result.score).toBeGreaterThan(80);
+    expect(result.breakdown.baseLeadScore).toBe(54);
+    expect(result.breakdown.manualPreference).toBe(5);
+  });
+});
+
+describe("Phase 5 outreach helpers", () => {
+  it("generates concise outreach from supplied facts without inventing details", () => {
+    const result = generateDeterministicOutreach({
+      developerProfile: {
+        name: "Waleed",
+        title: "Flutter developer",
+        skills: ["Flutter", "Firebase"],
+      },
+      signature: "Waleed",
+      lead: {
+        title: "Agency partnership",
+        opportunitySummary:
+          "Web agency has no visible mobile delivery team and serves SaaS clients.",
+        overallScore: 94,
+      },
+      contact: { fullName: "Sara Khan", role: "Founder" },
+      company: {
+        name: "Northstar Digital",
+        country: "United Kingdom",
+        hasMobileService: false,
+        hasFlutterService: false,
+      },
+      strategy: "AGENCY_PARTNERSHIP",
+    });
+
+    expect(result.subject).toContain("Northstar Digital");
+    expect(result.body).toContain("Sara");
+    expect(result.body).toContain("Flutter");
+    expect(result.body).not.toContain("worked with");
+    expect(result.body.split(/\s+/).length).toBeLessThanOrEqual(170);
+    expect(result.confidence).toBeGreaterThanOrEqual(70);
+  });
+
+  it("classifies unsubscribe and meeting replies deterministically", () => {
+    expect(
+      classifyDeterministicReply("Please unsubscribe me.").classification,
+    ).toBe("UNSUBSCRIBE");
+    expect(
+      classifyDeterministicReply("Could we schedule a meeting next week?")
+        .classification,
+    ).toBe("MEETING_REQUESTED");
+  });
+});
+
+describe("classifySocialOpportunity", () => {
+  it("classifies an X buyer post as a valid active requirement", () => {
+    const result = classifySocialOpportunity(
+      "We're looking for a Flutter developer to finish our Firebase application this month.",
+      "X",
+      new Date(),
+    );
+
+    expect(result.valid).toBe(true);
+    expect(result.leadType).toBe("ACTIVE_REQUIREMENT");
+    expect(result.buyerIntentScore).toBeGreaterThanOrEqual(80);
+    expect(result.recommendedChannel).toBe("X_REPLY");
+  });
+
+  it("rejects freelancer self-promotion", () => {
+    const result = classifySocialOpportunity(
+      "Flutter developer available for freelance projects. DM me.",
+      "X",
+      new Date(),
+    );
+
+    expect(result.valid).toBe(false);
+    expect(result.invalidReason).toBe("OTHER_FREELANCER");
+  });
+
+  it("rejects tutorial content", () => {
+    const result = classifySocialOpportunity(
+      "My new Flutter Firebase tutorial is live.",
+      "X",
+      new Date(),
+    );
+
+    expect(result.valid).toBe(false);
+    expect(result.invalidReason).toBe("TUTORIAL");
+  });
+
+  it("classifies a manually imported Reddit founder post", () => {
+    const result = classifySocialOpportunity(
+      "I'm building an MVP and need an experienced Flutter developer to help complete the mobile app.",
+      "REDDIT",
+      new Date(),
+    );
+
+    expect(result.valid).toBe(true);
+    expect(result.leadType).toBe("MVP_STARTUP");
+    expect(result.recommendedChannel).toBe("REDDIT_REPLY");
+  });
+
+  it("rejects student project requests", () => {
+    const result = classifySocialOpportunity(
+      "Can someone build my Flutter university assignment?",
+      "REDDIT",
+      new Date(),
+    );
+
+    expect(result.valid).toBe(false);
+    expect(result.invalidReason).toBe("STUDENT_PROJECT");
   });
 });

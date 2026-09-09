@@ -7,13 +7,24 @@ import {
   ArrowLeft,
   BrainCircuit,
   Building2,
+  ClipboardCheck,
+  ExternalLink,
   Mail,
   MapPin,
   RefreshCw,
   RotateCcw,
+  ThumbsDown,
+  ThumbsUp,
   UserRound,
 } from "lucide-react";
-import type { Company, Contact, Lead, RecommendedChannel } from "@scrapo/types";
+import type {
+  Company,
+  Contact,
+  Lead,
+  OutreachEligibility,
+  OutreachMessage,
+  RecommendedChannel,
+} from "@scrapo/types";
 import { apiFetch } from "@/lib/api";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -51,6 +62,33 @@ type LeadDetail = Lead & {
     signalType: string;
     content: string;
     sourceUrl: string | null;
+    profileUrl: string | null;
+    username: string | null;
+    displayName: string | null;
+    authorType: string | null;
+    authorTypeConfidence: number;
+    opportunityUrgency: string;
+    socialPreQualificationScore: number;
+    signalQualityScore: number;
+    rawLead?: {
+      sourceUrl: string | null;
+      content: string;
+      username: string | null;
+      displayName: string | null;
+      profileUrl: string | null;
+    } | null;
+  }>;
+  actions: Array<{
+    id: string;
+    platform: string | null;
+    actionType: string | null;
+    title: string;
+    suggestedText: string | null;
+    content: string | null;
+    sourceUrl: string | null;
+    profileUrl: string | null;
+    status: string;
+    expiresAt: string | null;
   }>;
   scores: LeadScore[];
   activities: Array<{
@@ -103,6 +141,32 @@ export default function LeadDetailPage() {
       }),
     onSuccess: () => void client.invalidateQueries({ queryKey: ["lead", id] }),
   });
+  const feedback = useMutation({
+    mutationFn: (rating: "LIKE" | "NEUTRAL" | "DISLIKE") =>
+      apiFetch(`/leads/${id}/feedback`, {
+        method: "POST",
+        body: JSON.stringify({ rating, reason: "Manual lead review" }),
+      }),
+    onSuccess: () => void client.invalidateQueries({ queryKey: ["lead", id] }),
+  });
+  const eligibility = useQuery({
+    queryKey: ["lead", id, "outreach-eligibility"],
+    queryFn: () =>
+      apiFetch<OutreachEligibility>(`/leads/${id}/outreach-eligibility`),
+  });
+  const generateOutreach = useMutation({
+    mutationFn: () =>
+      apiFetch<OutreachMessage>(`/leads/${id}/outreach/generate`, {
+        method: "POST",
+        body: JSON.stringify({}),
+      }),
+    onSuccess: () => {
+      void client.invalidateQueries({
+        queryKey: ["lead", id, "outreach-eligibility"],
+      });
+      void client.invalidateQueries({ queryKey: ["outreach"] });
+    },
+  });
 
   if (query.isLoading) return <LoadingState label="Loading lead..." />;
   if (query.error || !query.data)
@@ -111,6 +175,10 @@ export default function LeadDetailPage() {
     );
   const lead = query.data;
   const score = lead.scores[0];
+  const primarySignal =
+    lead.signals.find((signal) => signal.id === lead.primarySignalId) ??
+    lead.signals[0];
+  const primaryAction = lead.actions[0];
 
   return (
     <>
@@ -200,6 +268,88 @@ export default function LeadDetailPage() {
               )}
             </CardContent>
           </Card>
+          {(primarySignal || lead.socialPreQualificationScore > 0) && (
+            <Card>
+              <CardHeader>
+                <CardTitle>Social Signal</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4 text-sm">
+                <div>
+                  <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">
+                    Original evidence
+                  </p>
+                  <p className="mt-2 rounded-lg bg-slate-50 p-3 leading-6 text-slate-700">
+                    {primarySignal?.content ??
+                      lead.sourceContent ??
+                      "No source text captured."}
+                  </p>
+                  <div className="mt-2 flex flex-wrap gap-2 text-xs">
+                    {primarySignal?.sourceUrl && (
+                      <a
+                        href={primarySignal.sourceUrl}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="inline-flex items-center gap-1 text-blue-700"
+                      >
+                        Open original <ExternalLink className="h-3 w-3" />
+                      </a>
+                    )}
+                    {primarySignal?.profileUrl && (
+                      <a
+                        href={primarySignal.profileUrl}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="inline-flex items-center gap-1 text-blue-700"
+                      >
+                        Open profile <ExternalLink className="h-3 w-3" />
+                      </a>
+                    )}
+                  </div>
+                </div>
+                <div className="grid gap-3 md:grid-cols-4">
+                  <Metric
+                    label="Prequalification"
+                    value={`${lead.socialPreQualificationScore}/100`}
+                  />
+                  <Metric
+                    label="Buyer intent"
+                    value={`${lead.buyerIntentScore}/100`}
+                  />
+                  <Metric
+                    label="Urgency"
+                    value={lead.opportunityUrgency.replaceAll("_", " ")}
+                  />
+                  <Metric
+                    label="Identity"
+                    value={
+                      primarySignal?.authorType
+                        ? `${primarySignal.authorType.replaceAll("_", " ")} (${primarySignal.authorTypeConfidence}%)`
+                        : "Unknown"
+                    }
+                  />
+                </div>
+                {primaryAction && (
+                  <div className="rounded-lg border border-blue-100 bg-blue-50 p-4">
+                    <p className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wide text-blue-700">
+                      <ClipboardCheck className="h-4 w-4" />
+                      Recommended manual action · {primaryAction.status}
+                    </p>
+                    <p className="mt-2 text-sm text-blue-950">
+                      {primaryAction.suggestedText ??
+                        primaryAction.content ??
+                        primaryAction.title}
+                    </p>
+                    <p className="mt-2 text-xs text-blue-700">
+                      {primaryAction.actionType ?? primaryAction.platform}
+                      {primaryAction.expiresAt
+                        ? ` · expires ${new Date(primaryAction.expiresAt).toLocaleDateString()}`
+                        : ""}
+                    </p>
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          )}
           <Card>
             <CardHeader>
               <CardTitle>Score Breakdown</CardTitle>
@@ -345,6 +495,97 @@ export default function LeadDetailPage() {
                 icon={Mail}
                 text={lead.contact?.email ?? "Email unavailable"}
               />
+            </CardContent>
+          </Card>
+          <Card>
+            <CardHeader>
+              <CardTitle>Phase 6 Ranking</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-3 text-sm">
+              <Metric
+                label="Ranking score"
+                value={`${lead.rankingScore || 0}/100`}
+              />
+              {(lead.rankReason ?? []).length ? (
+                <ul className="list-disc space-y-1 pl-4 text-slate-600">
+                  {lead.rankReason.map((reason) => (
+                    <li key={reason}>{reason}</li>
+                  ))}
+                </ul>
+              ) : (
+                <p className="text-slate-500">
+                  Ranking will appear after analytics refresh.
+                </p>
+              )}
+              <div className="flex flex-wrap gap-2">
+                <Button
+                  size="sm"
+                  variant="outline"
+                  disabled={feedback.isPending}
+                  onClick={() => feedback.mutate("LIKE")}
+                >
+                  <ThumbsUp className="h-4 w-4" />
+                  Like
+                </Button>
+                <Button
+                  size="sm"
+                  variant="outline"
+                  disabled={feedback.isPending}
+                  onClick={() => feedback.mutate("NEUTRAL")}
+                >
+                  Neutral
+                </Button>
+                <Button
+                  size="sm"
+                  variant="outline"
+                  disabled={feedback.isPending}
+                  onClick={() => feedback.mutate("DISLIKE")}
+                >
+                  <ThumbsDown className="h-4 w-4" />
+                  Dislike
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+          <Card>
+            <CardHeader>
+              <CardTitle>Email Outreach</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-3 text-sm">
+              <Metric
+                label="Eligibility"
+                value={
+                  eligibility.data?.eligible
+                    ? "Ready"
+                    : (eligibility.data?.reasons[0] ?? "Checking")
+                }
+              />
+              {eligibility.data?.warnings.length ? (
+                <p className="rounded-lg bg-amber-50 p-3 text-xs text-amber-700">
+                  {eligibility.data.warnings.join(" ")}
+                </p>
+              ) : null}
+              <div className="flex flex-wrap gap-2">
+                <Button
+                  onClick={() => generateOutreach.mutate()}
+                  disabled={generateOutreach.isPending}
+                >
+                  Generate Email
+                </Button>
+                <Button asChild variant="outline">
+                  <Link href="/outreach">View outreach</Link>
+                </Button>
+              </div>
+              {generateOutreach.data && (
+                <p className="rounded-lg bg-emerald-50 p-3 text-xs text-emerald-700">
+                  Draft generated: {generateOutreach.data.subject}
+                </p>
+              )}
+              {generateOutreach.error && (
+                <p className="rounded-lg bg-red-50 p-3 text-xs text-red-700">
+                  {generateOutreach.error.message}
+                </p>
+              )}
             </CardContent>
           </Card>
           <Card>

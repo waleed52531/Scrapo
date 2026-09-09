@@ -1,4 +1,4 @@
-import { z } from 'zod';
+import { z } from "zod";
 
 export const paginationSchema = z.object({
   page: z.coerce.number().int().min(1).default(1),
@@ -6,7 +6,7 @@ export const paginationSchema = z.object({
 });
 
 export const uuidSchema = z.string().uuid();
-export const optionalUrlSchema = z.union([z.literal(''), z.url()]).optional();
+export const optionalUrlSchema = z.union([z.literal(""), z.url()]).optional();
 
 export const scoreSchema = z.coerce.number().int().min(0).max(100);
 
@@ -21,6 +21,10 @@ export const scoringWeightsSchema = z
     companyQuality: z.number().min(0).max(100),
     countryPriority: z.number().min(0).max(100),
   })
-  .refine((weights) => Object.values(weights).reduce((sum, value) => sum + value, 0) === 100, {
-    message: 'Scoring weights must total 100.',
-  });
+  .refine(
+    (weights) =>
+      Object.values(weights).reduce((sum, value) => sum + value, 0) === 100,
+    {
+      message: "Scoring weights must total 100.",
+    },
+  );

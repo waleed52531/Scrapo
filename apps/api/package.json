@@ -5,7 +5,7 @@
   "scripts": {
     "build": "nest build",
     "dev": "nest start --watch",
-    "start": "node dist/main.js",
+    "start": "node dist/src/main.js",
     "typecheck": "pnpm --filter @scrapo/shared build && tsc -p tsconfig.json --noEmit",
     "lint": "eslint src test --max-warnings=0",
     "test": "vitest run --exclude test/**/*.e2e.spec.ts",

@@ -28,6 +28,54 @@ services:
       timeout: 3s
       retries: 10
 
+  api:
+    build:
+      context: .
+      target: api
+    profiles: ["app"]
+    env_file:
+      - apps/api/.env
+    environment:
+      NODE_ENV: development
+      PORT: 4000
+    ports:
+      - "4000:4000"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+
+  worker:
+    build:
+      context: .
+      target: worker
+    profiles: ["app"]
+    env_file:
+      - apps/worker/.env
+    environment:
+      NODE_ENV: development
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+
+  web:
+    build:
+      context: .
+      target: web
+    profiles: ["app"]
+    env_file:
+      - apps/web/.env.local
+    environment:
+      NODE_ENV: development
+      PORT: 3000
+    ports:
+      - "3000:3000"
+    depends_on:
+      - api
+
 volumes:
   scrapo_postgres:
   scrapo_redis:

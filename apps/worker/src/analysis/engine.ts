@@ -428,13 +428,14 @@ function inferLead(
       : /@|contact|email/.test(lower)
         ? 55
         : 25;
-  const agencyFit = active && hasMobileNeed
-    ? 90
-    : agency
-      ? companyAnalysis?.hasMobileDevelopment
-        ? 55
-        : 90
-      : 35;
+  const agencyFit =
+    active && hasMobileNeed
+      ? 90
+      : agency
+        ? companyAnalysis?.hasMobileDevelopment
+          ? 55
+          : 90
+        : 35;
   const leadType = invalidReason
     ? LeadType.INVALID
     : active && hasMobileNeed
@@ -624,10 +625,18 @@ async function tryOpenAiLeadAnalysis(
         latencyMs: Date.now() - startedAt,
         inputTokens: payload.usage?.prompt_tokens,
         outputTokens: payload.usage?.completion_tokens,
-        error: payload.error?.message ?? (parsed.success ? undefined : `Malformed AI response on attempt ${attempt}`),
+        error:
+          payload.error?.message ??
+          (parsed.success
+            ? undefined
+            : `Malformed AI response on attempt ${attempt}`),
       },
     });
-    if (response.ok && parsed.success) return { ...inferLead(context, {} as LeadWithRelations, null), ...parsed.data };
+    if (response.ok && parsed.success)
+      return {
+        ...inferLead(context, {} as LeadWithRelations, null),
+        ...parsed.data,
+      };
   }
   return null;
 }

@@ -1,2 +1,2 @@
-import config from '@scrapo/eslint-config/next';
+import config from "@scrapo/eslint-config/next";
 export default config;

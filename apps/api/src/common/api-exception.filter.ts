@@ -1,6 +1,8 @@
-import type { ArgumentsHost, ExceptionFilter } from '@nestjs/common';
-import { Catch, HttpException, HttpStatus, Logger } from '@nestjs/common';
-import type { Request, Response } from 'express';
+import type { ArgumentsHost, ExceptionFilter } from "@nestjs/common";
+import { Catch, HttpException, HttpStatus, Logger } from "@nestjs/common";
+import type { Request, Response } from "express";
+import { captureException } from "./error-tracking";
+import { redactSensitive, redactString } from "./redact";
 
 @Catch()
 export class ApiExceptionFilter implements ExceptionFilter {
@@ -10,31 +12,75 @@ export class ApiExceptionFilter implements ExceptionFilter {
     const context = host.switchToHttp();
     const response = context.getResponse<Response>();
     const request = context.getRequest<Request>();
-    const status = exception instanceof HttpException ? exception.getStatus() : HttpStatus.INTERNAL_SERVER_ERROR;
-    const exceptionResponse = exception instanceof HttpException ? exception.getResponse() : undefined;
-    const detail = typeof exceptionResponse === 'object' && exceptionResponse !== null ? exceptionResponse as Record<string, unknown> : undefined;
-    const rawMessage = detail?.message ?? (exception instanceof Error ? exception.message : 'Unexpected server error.');
-    const message = Array.isArray(rawMessage) ? rawMessage.join(', ') : String(rawMessage);
-    const code = typeof detail?.code === 'string' ? detail.code : this.statusCodeToCode(status);
+    const status =
+      exception instanceof HttpException
+        ? exception.getStatus()
+        : HttpStatus.INTERNAL_SERVER_ERROR;
+    const exceptionResponse =
+      exception instanceof HttpException ? exception.getResponse() : undefined;
+    const detail =
+      typeof exceptionResponse === "object" && exceptionResponse !== null
+        ? (exceptionResponse as Record<string, unknown>)
+        : undefined;
+    const rawMessage =
+      detail?.message ??
+      (exception instanceof Error
+        ? exception.message
+        : "Unexpected server error.");
+    const message = redactString(
+      Array.isArray(rawMessage) ? rawMessage.join(", ") : String(rawMessage),
+    );
+    const code =
+      typeof detail?.code === "string"
+        ? detail.code
+        : this.statusCodeToCode(status);
 
     if (status >= 500) {
-      this.logger.error(JSON.stringify({ requestId: request.requestId, method: request.method, path: request.url, status, message }));
+      captureException(exception, {
+        requestId: request.requestId,
+        method: request.method,
+        path: request.url,
+        status,
+        code,
+      });
+      this.logger.error(
+        JSON.stringify({
+          timestamp: new Date().toISOString(),
+          service: "api",
+          requestId: request.requestId,
+          method: request.method,
+          path: request.url,
+          status,
+          code,
+          message,
+        }),
+      );
     }
 
     response.status(status).json({
       success: false,
       error: {
         code,
-        message: status >= 500 && process.env.NODE_ENV === 'production' ? 'An unexpected error occurred.' : message,
-        ...(Array.isArray(rawMessage) ? { details: rawMessage } : {}),
+        message:
+          status >= 500 && process.env.NODE_ENV === "production"
+            ? "An unexpected error occurred."
+            : message,
+        ...(Array.isArray(rawMessage) && status < 500
+          ? { details: redactSensitive(rawMessage) }
+          : {}),
       },
     });
   }
 
   private statusCodeToCode(status: number) {
     const codes: Record<number, string> = {
-      400: 'VALIDATION_ERROR', 401: 'UNAUTHORIZED', 403: 'FORBIDDEN', 404: 'NOT_FOUND',
-      409: 'CONFLICT', 429: 'RATE_LIMITED', 500: 'INTERNAL_SERVER_ERROR',
+      400: "VALIDATION_ERROR",
+      401: "UNAUTHORIZED",
+      403: "FORBIDDEN",
+      404: "NOT_FOUND",
+      409: "CONFLICT",
+      429: "RATE_LIMITED",
+      500: "INTERNAL_SERVER_ERROR",
     };
     return codes[status] ?? `HTTP_${status}`;
   }

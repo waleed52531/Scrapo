@@ -1,19 +1,28 @@
-import { ApiProperty, ApiPropertyOptional, PartialType } from '@nestjs/swagger';
-import { Transform, Type } from 'class-transformer';
-import { IsArray, IsBoolean, IsInt, IsOptional, IsString, IsUrl, Max, Min } from 'class-validator';
-import { PaginationDto } from '../../common/pagination.dto';
+import { ApiProperty, ApiPropertyOptional, PartialType } from "@nestjs/swagger";
+import { Transform, Type } from "class-transformer";
+import {
+  IsArray,
+  IsBoolean,
+  IsInt,
+  IsOptional,
+  IsString,
+  IsUrl,
+  Max,
+  Min,
+} from "class-validator";
+import { PaginationDto } from "../../common/pagination.dto";
 
 export class CreateCompanyDto {
-  @ApiProperty({ example: 'Northstar Digital' })
+  @ApiProperty({ example: "Northstar Digital" })
   @IsString()
   name: string;
 
-  @ApiPropertyOptional({ example: 'northstar.example' })
+  @ApiPropertyOptional({ example: "northstar.example" })
   @IsOptional()
   @IsString()
   domain?: string;
 
-  @ApiPropertyOptional({ example: 'https://northstar.example' })
+  @ApiPropertyOptional({ example: "https://northstar.example" })
   @IsOptional()
   @IsUrl({ require_tld: false })
   website?: string;
@@ -105,7 +114,7 @@ export class CompanyQueryDto extends PaginationDto {
 
   @ApiPropertyOptional()
   @IsOptional()
-  @Transform(({ value }) => value === 'true')
+  @Transform(({ value }) => value === "true")
   @IsBoolean()
   hasMobileService?: boolean;
 }

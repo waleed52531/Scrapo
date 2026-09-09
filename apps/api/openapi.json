@@ -10,9 +10,161 @@
             "description": ""
           }
         },
-        "summary": "Check API and database health",
+        "summary": "Check public API process and database health",
         "tags": [
           "health"
+        ]
+      }
+    },
+    "/api/v1/health/system": {
+      "get": {
+        "operationId": "HealthController_system",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Check protected system health across infrastructure and providers",
+        "tags": [
+          "health"
+        ]
+      }
+    },
+    "/api/v1/health/usage": {
+      "get": {
+        "operationId": "HealthController_usage",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Summarize usage and configured budget limits",
+        "tags": [
+          "health"
+        ]
+      }
+    },
+    "/api/v1/system/health": {
+      "get": {
+        "operationId": "SystemHealthController_systemHealth",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Check protected system health across infrastructure and providers",
+        "tags": [
+          "system"
+        ]
+      }
+    },
+    "/api/v1/action-queue": {
+      "get": {
+        "operationId": "ActionQueueController_list",
+        "parameters": [
+          {
+            "name": "status",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "PENDING",
+                "COMPLETED",
+                "SKIPPED",
+                "EXPIRED"
+              ]
+            }
+          },
+          {
+            "name": "platform",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "X",
+                "REDDIT",
+                "TELEGRAM",
+                "WEB",
+                "AGENCY_DIRECTORY",
+                "LINKEDIN",
+                "OTHER",
+                "MANUAL"
+              ]
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "List manual social/outreach action items",
+        "tags": [
+          "action-queue"
+        ]
+      }
+    },
+    "/api/v1/action-queue/{id}": {
+      "patch": {
+        "operationId": "ActionQueueController_update",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateActionItemDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Update a manual action item status/content",
+        "tags": [
+          "action-queue"
         ]
       }
     },
@@ -20,6 +172,16 @@
       "post": {
         "operationId": "AnalysisController_analyzeWebsite",
         "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/WebsiteAnalysisDto"
+              }
+            }
+          }
+        },
         "responses": {
           "201": {
             "description": ""
@@ -33,6 +195,801 @@
         "summary": "Analyze a public company website with SSRF protection",
         "tags": [
           "analysis"
+        ]
+      }
+    },
+    "/api/v1/automation": {
+      "get": {
+        "operationId": "AutomationController_list",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "List automation rules and status",
+        "tags": [
+          "automation"
+        ]
+      },
+      "post": {
+        "operationId": "AutomationController_create",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateAutomationRuleDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Create an automation rule",
+        "tags": [
+          "automation"
+        ]
+      }
+    },
+    "/api/v1/automation/status": {
+      "get": {
+        "operationId": "AutomationController_status",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Get automation dashboard status",
+        "tags": [
+          "automation"
+        ]
+      }
+    },
+    "/api/v1/automation/pause": {
+      "post": {
+        "operationId": "AutomationController_pause",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Pause automation without pausing outreach",
+        "tags": [
+          "automation"
+        ]
+      }
+    },
+    "/api/v1/automation/resume": {
+      "post": {
+        "operationId": "AutomationController_resume",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Resume automation and clear kill switch",
+        "tags": [
+          "automation"
+        ]
+      }
+    },
+    "/api/v1/automation/stop-all": {
+      "post": {
+        "operationId": "AutomationController_stopAll",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Enable global automation kill switch",
+        "tags": [
+          "automation"
+        ]
+      }
+    },
+    "/api/v1/automation-runs": {
+      "get": {
+        "operationId": "AutomationController_runs",
+        "parameters": [
+          {
+            "name": "status",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "automationRuleId",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "page",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "number"
+            }
+          },
+          {
+            "name": "limit",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "List automation run history",
+        "tags": [
+          "automation"
+        ]
+      }
+    },
+    "/api/v1/automation-runs/{id}": {
+      "get": {
+        "operationId": "AutomationController_runDetail",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Get automation run detail",
+        "tags": [
+          "automation"
+        ]
+      }
+    },
+    "/api/v1/automation-runs/{id}/retry": {
+      "post": {
+        "operationId": "AutomationController_retry",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Retry a failed automation run with new history",
+        "tags": [
+          "automation"
+        ]
+      }
+    },
+    "/api/v1/automation/{id}": {
+      "get": {
+        "operationId": "AutomationController_get",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Get automation rule detail",
+        "tags": [
+          "automation"
+        ]
+      },
+      "patch": {
+        "operationId": "AutomationController_update",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateAutomationRuleDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Update automation rule configuration",
+        "tags": [
+          "automation"
+        ]
+      },
+      "delete": {
+        "operationId": "AutomationController_delete",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Delete automation rule",
+        "tags": [
+          "automation"
+        ]
+      }
+    },
+    "/api/v1/automation/{id}/run": {
+      "post": {
+        "operationId": "AutomationController_runNow",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Run automation immediately using saved config",
+        "tags": [
+          "automation"
+        ]
+      }
+    },
+    "/api/v1/automation/{id}/enable": {
+      "post": {
+        "operationId": "AutomationController_enable",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Enable an automation rule",
+        "tags": [
+          "automation"
+        ]
+      }
+    },
+    "/api/v1/automation/{id}/disable": {
+      "post": {
+        "operationId": "AutomationController_disable",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Disable an automation rule",
+        "tags": [
+          "automation"
+        ]
+      }
+    },
+    "/api/v1/automation/{id}/skip-next": {
+      "post": {
+        "operationId": "AutomationController_skipNext",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Skip the next scheduled occurrence",
+        "tags": [
+          "automation"
+        ]
+      }
+    },
+    "/api/v1/integrations/gmail": {
+      "get": {
+        "operationId": "GmailController_status",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Get Gmail integration status",
+        "tags": [
+          "gmail"
+        ]
+      }
+    },
+    "/api/v1/integrations/gmail/connect": {
+      "post": {
+        "operationId": "GmailController_connect",
+        "parameters": [],
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Start Gmail OAuth or connect mock Gmail locally",
+        "tags": [
+          "gmail"
+        ]
+      }
+    },
+    "/api/v1/integrations/gmail/callback": {
+      "get": {
+        "operationId": "GmailController_callback",
+        "parameters": [
+          {
+            "name": "code",
+            "required": true,
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "state",
+            "required": true,
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Handle Google OAuth callback",
+        "tags": [
+          "gmail"
+        ]
+      }
+    },
+    "/api/v1/integrations/gmail/disconnect": {
+      "post": {
+        "operationId": "GmailController_disconnect",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Disconnect Gmail while preserving history",
+        "tags": [
+          "gmail"
+        ]
+      }
+    },
+    "/api/v1/integrations/gmail/test": {
+      "post": {
+        "operationId": "GmailController_test",
+        "parameters": [],
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Test Gmail connection without exposing tokens",
+        "tags": [
+          "gmail"
+        ]
+      }
+    },
+    "/api/v1/integrations/gmail/sync": {
+      "post": {
+        "operationId": "GmailController_sync",
+        "parameters": [],
+        "responses": {
+          "202": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Queue Gmail reply synchronization",
+        "tags": [
+          "gmail"
+        ]
+      }
+    },
+    "/api/v1/integrations/gmail/mock-reply": {
+      "post": {
+        "operationId": "GmailController_mockReply",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/MockGmailReplyDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Queue a mock Gmail reply for local testing",
+        "tags": [
+          "gmail"
+        ]
+      }
+    },
+    "/api/v1/discovery/web/search": {
+      "post": {
+        "operationId": "DiscoveryController_webSearch",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/WebSearchDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Run a provider-backed or mock web search preview",
+        "tags": [
+          "discovery"
+        ]
+      }
+    },
+    "/api/v1/integrations/web-search/health": {
+      "get": {
+        "operationId": "DiscoveryController_webSearchHealth",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Check web search provider configuration",
+        "tags": [
+          "discovery"
+        ]
+      }
+    },
+    "/api/v1/integrations/email-enrichment/health": {
+      "get": {
+        "operationId": "DiscoveryController_emailEnrichmentHealth",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Check email enrichment provider configuration",
+        "tags": [
+          "discovery"
+        ]
+      }
+    },
+    "/api/v1/integrations/email-verification/health": {
+      "get": {
+        "operationId": "DiscoveryController_emailVerificationHealth",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Check email verification provider configuration",
+        "tags": [
+          "discovery"
+        ]
+      }
+    },
+    "/api/v1/integrations/x/health": {
+      "get": {
+        "operationId": "DiscoveryController_xHealth",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Check X discovery configuration",
+        "tags": [
+          "discovery"
+        ]
+      }
+    },
+    "/api/v1/integrations/reddit/health": {
+      "get": {
+        "operationId": "DiscoveryController_redditHealth",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Check Reddit compliant API configuration",
+        "tags": [
+          "discovery"
+        ]
+      }
+    },
+    "/api/v1/integrations/telegram/health": {
+      "get": {
+        "operationId": "DiscoveryController_telegramHealth",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Check Telegram source monitoring configuration",
+        "tags": [
+          "discovery"
+        ]
+      }
+    },
+    "/api/v1/discovery/social/manual": {
+      "post": {
+        "operationId": "DiscoveryController_importSocial",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ManualSocialImportDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Queue manual Reddit/X/Telegram signal ingestion",
+        "tags": [
+          "discovery"
         ]
       }
     },
@@ -56,10 +1013,693 @@
         ]
       }
     },
+    "/api/v1/campaigns": {
+      "get": {
+        "operationId": "CampaignsController_list",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "List outreach campaigns with analytics",
+        "tags": [
+          "campaigns"
+        ]
+      },
+      "post": {
+        "operationId": "CampaignsController_create",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateCampaignDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Create a controlled outreach campaign",
+        "tags": [
+          "campaigns"
+        ]
+      }
+    },
+    "/api/v1/campaigns/{id}": {
+      "get": {
+        "operationId": "CampaignsController_get",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Get campaign detail",
+        "tags": [
+          "campaigns"
+        ]
+      },
+      "patch": {
+        "operationId": "CampaignsController_update",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateCampaignDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Update a campaign",
+        "tags": [
+          "campaigns"
+        ]
+      }
+    },
+    "/api/v1/campaigns/{id}/activate": {
+      "post": {
+        "operationId": "CampaignsController_activate",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Activate a campaign",
+        "tags": [
+          "campaigns"
+        ]
+      }
+    },
+    "/api/v1/campaigns/{id}/pause": {
+      "post": {
+        "operationId": "CampaignsController_pause",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Pause a campaign",
+        "tags": [
+          "campaigns"
+        ]
+      }
+    },
+    "/api/v1/leads/{leadId}/feedback": {
+      "get": {
+        "operationId": "LeadFeedbackController_list",
+        "parameters": [
+          {
+            "name": "leadId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "List manual feedback for a lead",
+        "tags": [
+          "lead-feedback"
+        ]
+      },
+      "post": {
+        "operationId": "LeadFeedbackController_create",
+        "parameters": [
+          {
+            "name": "leadId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateLeadFeedbackDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Store manual lead feedback for ranking",
+        "tags": [
+          "lead-feedback"
+        ]
+      }
+    },
+    "/api/v1/lead-hunts": {
+      "get": {
+        "operationId": "LeadHuntsController_list",
+        "parameters": [
+          {
+            "name": "page",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "minimum": 1,
+              "default": 1,
+              "type": "number"
+            }
+          },
+          {
+            "name": "limit",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "minimum": 1,
+              "maximum": 100,
+              "default": 20,
+              "type": "number"
+            }
+          },
+          {
+            "name": "status",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "example": "COMPLETED",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "List async agency discovery runs",
+        "tags": [
+          "lead-hunts"
+        ]
+      },
+      "post": {
+        "operationId": "LeadHuntsController_create",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateLeadHuntDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "202": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Start an async agency lead-hunt run",
+        "tags": [
+          "lead-hunts"
+        ]
+      }
+    },
+    "/api/v1/lead-hunts/{id}": {
+      "get": {
+        "operationId": "LeadHuntsController_get",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Get lead-hunt progress and generated leads",
+        "tags": [
+          "lead-hunts"
+        ]
+      }
+    },
+    "/api/v1/lead-hunts/{id}/cancel": {
+      "post": {
+        "operationId": "LeadHuntsController_cancel",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Cancel a queued/running lead hunt",
+        "tags": [
+          "lead-hunts"
+        ]
+      }
+    },
+    "/api/v1/search-queries": {
+      "get": {
+        "operationId": "SearchQueriesController_list",
+        "parameters": [
+          {
+            "name": "page",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "minimum": 1,
+              "default": 1,
+              "type": "number"
+            }
+          },
+          {
+            "name": "limit",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "minimum": 1,
+              "maximum": 100,
+              "default": 20,
+              "type": "number"
+            }
+          },
+          {
+            "name": "search",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "country",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "category",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "source",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "X",
+                "REDDIT",
+                "TELEGRAM",
+                "WEB",
+                "AGENCY_DIRECTORY",
+                "LINKEDIN",
+                "OTHER",
+                "MANUAL"
+              ]
+            }
+          },
+          {
+            "name": "enabled",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "boolean"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "List workspace discovery search queries",
+        "tags": [
+          "search-queries"
+        ]
+      },
+      "post": {
+        "operationId": "SearchQueriesController_create",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateSearchQueryDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Create a workspace discovery search query",
+        "tags": [
+          "search-queries"
+        ]
+      }
+    },
+    "/api/v1/search-queries/defaults": {
+      "post": {
+        "operationId": "SearchQueriesController_installDefaults",
+        "parameters": [],
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Install or refresh default agency queries",
+        "tags": [
+          "search-queries"
+        ]
+      }
+    },
+    "/api/v1/search-queries/{id}": {
+      "get": {
+        "operationId": "SearchQueriesController_get",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Get a search query and recent run history",
+        "tags": [
+          "search-queries"
+        ]
+      },
+      "patch": {
+        "operationId": "SearchQueriesController_update",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateSearchQueryDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Update a search query",
+        "tags": [
+          "search-queries"
+        ]
+      },
+      "delete": {
+        "operationId": "SearchQueriesController_delete",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Delete a search query",
+        "tags": [
+          "search-queries"
+        ]
+      }
+    },
+    "/api/v1/search-queries/{id}/clone": {
+      "post": {
+        "operationId": "SearchQueriesController_clone",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Clone a search query as a disabled draft",
+        "tags": [
+          "search-queries"
+        ]
+      }
+    },
     "/api/v1/companies": {
       "get": {
         "operationId": "CompaniesController_list",
-        "parameters": [],
+        "parameters": [
+          {
+            "name": "page",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "minimum": 1,
+              "default": 1,
+              "type": "number"
+            }
+          },
+          {
+            "name": "limit",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "minimum": 1,
+              "maximum": 100,
+              "default": 20,
+              "type": "number"
+            }
+          },
+          {
+            "name": "search",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "country",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "hasMobileService",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "boolean"
+            }
+          }
+        ],
         "responses": {
           "200": {
             "description": ""
@@ -78,6 +1718,16 @@
       "post": {
         "operationId": "CompaniesController_create",
         "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateCompanyDto"
+              }
+            }
+          }
+        },
         "responses": {
           "201": {
             "description": ""
@@ -97,7 +1747,16 @@
     "/api/v1/companies/{id}": {
       "get": {
         "operationId": "CompaniesController_get",
-        "parameters": [],
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
         "responses": {
           "200": {
             "description": ""
@@ -115,7 +1774,26 @@
       },
       "patch": {
         "operationId": "CompaniesController_update",
-        "parameters": [],
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateCompanyDto"
+              }
+            }
+          }
+        },
         "responses": {
           "200": {
             "description": ""
@@ -133,7 +1811,16 @@
       },
       "delete": {
         "operationId": "CompaniesController_delete",
-        "parameters": [],
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
         "responses": {
           "200": {
             "description": ""
@@ -153,7 +1840,26 @@
     "/api/v1/companies/{id}/analyze": {
       "post": {
         "operationId": "CompaniesController_analyze",
-        "parameters": [],
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AnalyzeLeadDto"
+              }
+            }
+          }
+        },
         "responses": {
           "202": {
             "description": ""
@@ -170,10 +1876,95 @@
         ]
       }
     },
+    "/api/v1/companies/{id}/find-contacts": {
+      "post": {
+        "operationId": "CompaniesController_findContacts",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "202": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Queue public contact discovery for a company",
+        "tags": [
+          "companies"
+        ]
+      }
+    },
     "/api/v1/contacts": {
       "get": {
         "operationId": "ContactsController_list",
-        "parameters": [],
+        "parameters": [
+          {
+            "name": "page",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "minimum": 1,
+              "default": 1,
+              "type": "number"
+            }
+          },
+          {
+            "name": "limit",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "minimum": 1,
+              "maximum": 100,
+              "default": 20,
+              "type": "number"
+            }
+          },
+          {
+            "name": "search",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "companyId",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          },
+          {
+            "name": "emailStatus",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "UNKNOWN",
+                "GUESSED",
+                "LIKELY_VALID",
+                "UNVERIFIED",
+                "VERIFIED",
+                "INVALID",
+                "BOUNCED"
+              ]
+            }
+          }
+        ],
         "responses": {
           "200": {
             "description": ""
@@ -192,6 +1983,16 @@
       "post": {
         "operationId": "ContactsController_create",
         "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateContactDto"
+              }
+            }
+          }
+        },
         "responses": {
           "201": {
             "description": ""
@@ -211,7 +2012,16 @@
     "/api/v1/contacts/{id}": {
       "get": {
         "operationId": "ContactsController_get",
-        "parameters": [],
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
         "responses": {
           "200": {
             "description": ""
@@ -229,7 +2039,26 @@
       },
       "patch": {
         "operationId": "ContactsController_update",
-        "parameters": [],
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateContactDto"
+              }
+            }
+          }
+        },
         "responses": {
           "200": {
             "description": ""
@@ -247,7 +2076,16 @@
       },
       "delete": {
         "operationId": "ContactsController_delete",
-        "parameters": [],
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
         "responses": {
           "200": {
             "description": ""
@@ -264,10 +2102,233 @@
         ]
       }
     },
+    "/api/v1/contacts/{id}/verify-email": {
+      "post": {
+        "operationId": "ContactsController_verifyEmail",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "202": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Queue email verification for a contact",
+        "tags": [
+          "contacts"
+        ]
+      }
+    },
     "/api/v1/leads": {
       "get": {
         "operationId": "LeadsController_list",
-        "parameters": [],
+        "parameters": [
+          {
+            "name": "page",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "minimum": 1,
+              "default": 1,
+              "type": "number"
+            }
+          },
+          {
+            "name": "limit",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "minimum": 1,
+              "maximum": 100,
+              "default": 20,
+              "type": "number"
+            }
+          },
+          {
+            "name": "status",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "NEW",
+                "ANALYZING",
+                "QUALIFIED",
+                "SHORTLISTED",
+                "DRAFTED",
+                "APPROVED",
+                "CONTACTED",
+                "FOLLOW_UP",
+                "REPLIED",
+                "INTERESTED",
+                "MEETING",
+                "PROPOSAL",
+                "WON",
+                "LOST",
+                "NOT_INTERESTED",
+                "DO_NOT_CONTACT",
+                "INVALID",
+                "STALE",
+                "ARCHIVED"
+              ]
+            }
+          },
+          {
+            "name": "temperature",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "HOT",
+                "STRONG",
+                "REVIEW",
+                "WEAK",
+                "REJECT"
+              ]
+            }
+          },
+          {
+            "name": "source",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "X",
+                "REDDIT",
+                "TELEGRAM",
+                "WEB",
+                "AGENCY_DIRECTORY",
+                "LINKEDIN",
+                "OTHER",
+                "MANUAL"
+              ]
+            }
+          },
+          {
+            "name": "leadType",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "AGENCY_PARTNER",
+                "ACTIVE_REQUIREMENT",
+                "BUSINESS_OPPORTUNITY",
+                "MVP_STARTUP",
+                "EXISTING_APP_FIX",
+                "FIREBASE_API_SUPPORT",
+                "APP_STORE_SUPPORT",
+                "GENERAL_MOBILE_SUPPORT",
+                "MANUAL",
+                "INVALID",
+                "PERMANENT_JOB",
+                "OTHER"
+              ]
+            }
+          },
+          {
+            "name": "country",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "company",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "minimumScore",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "minimum": 0,
+              "maximum": 100,
+              "type": "number"
+            }
+          },
+          {
+            "name": "maximumScore",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "minimum": 0,
+              "maximum": 100,
+              "type": "number"
+            }
+          },
+          {
+            "name": "dateFrom",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "dateTo",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "search",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "sortBy",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "default": "score",
+              "type": "string",
+              "enum": [
+                "score",
+                "createdAt",
+                "lastSignalAt",
+                "companyName"
+              ]
+            }
+          },
+          {
+            "name": "sortOrder",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "default": "desc",
+              "type": "string",
+              "enum": [
+                "asc",
+                "desc"
+              ]
+            }
+          }
+        ],
         "responses": {
           "200": {
             "description": ""
@@ -286,6 +2347,16 @@
       "post": {
         "operationId": "LeadsController_create",
         "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateLeadDto"
+              }
+            }
+          }
+        },
         "responses": {
           "201": {
             "description": ""
@@ -305,7 +2376,16 @@
     "/api/v1/leads/{id}": {
       "get": {
         "operationId": "LeadsController_get",
-        "parameters": [],
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
         "responses": {
           "200": {
             "description": ""
@@ -323,7 +2403,26 @@
       },
       "patch": {
         "operationId": "LeadsController_update",
-        "parameters": [],
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateLeadDto"
+              }
+            }
+          }
+        },
         "responses": {
           "200": {
             "description": ""
@@ -341,7 +2440,16 @@
       },
       "delete": {
         "operationId": "LeadsController_delete",
-        "parameters": [],
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
         "responses": {
           "200": {
             "description": ""
@@ -361,7 +2469,16 @@
     "/api/v1/leads/{id}/scores": {
       "get": {
         "operationId": "LeadsController_scores",
-        "parameters": [],
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
         "responses": {
           "200": {
             "description": ""
@@ -381,7 +2498,26 @@
     "/api/v1/leads/{id}/analyze": {
       "post": {
         "operationId": "LeadsController_analyze",
-        "parameters": [],
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AnalyzeLeadDto"
+              }
+            }
+          }
+        },
         "responses": {
           "202": {
             "description": ""
@@ -401,7 +2537,16 @@
     "/api/v1/leads/{id}/rescore": {
       "post": {
         "operationId": "LeadsController_rescore",
-        "parameters": [],
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
         "responses": {
           "202": {
             "description": ""
@@ -421,7 +2566,26 @@
     "/api/v1/leads/{id}/score-override": {
       "post": {
         "operationId": "LeadsController_overrideScore",
-        "parameters": [],
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ScoreOverrideDto"
+              }
+            }
+          }
+        },
         "responses": {
           "201": {
             "description": ""
@@ -438,10 +2602,215 @@
         ]
       }
     },
+    "/api/v1/notifications": {
+      "get": {
+        "operationId": "NotificationsController_list",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "List in-app notifications",
+        "tags": [
+          "notifications"
+        ]
+      }
+    },
+    "/api/v1/notifications/{id}/read": {
+      "patch": {
+        "operationId": "NotificationsController_read",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Mark one notification read",
+        "tags": [
+          "notifications"
+        ]
+      }
+    },
+    "/api/v1/notifications/read-all": {
+      "post": {
+        "operationId": "NotificationsController_readAll",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Mark all notifications read",
+        "tags": [
+          "notifications"
+        ]
+      }
+    },
+    "/api/v1/optimization/recommendations": {
+      "get": {
+        "operationId": "OptimizationController_list",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "List performance optimization recommendations",
+        "tags": [
+          "optimization"
+        ]
+      }
+    },
+    "/api/v1/optimization/recommendations/generate": {
+      "post": {
+        "operationId": "OptimizationController_generate",
+        "parameters": [],
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Generate recommendations from historical outcomes",
+        "tags": [
+          "optimization"
+        ]
+      }
+    },
+    "/api/v1/optimization/recommendations/{id}/accept": {
+      "post": {
+        "operationId": "OptimizationController_accept",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Accept and explicitly apply a recommendation",
+        "tags": [
+          "optimization"
+        ]
+      }
+    },
+    "/api/v1/optimization/recommendations/{id}/reject": {
+      "post": {
+        "operationId": "OptimizationController_reject",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Reject an optimization recommendation",
+        "tags": [
+          "optimization"
+        ]
+      }
+    },
+    "/api/v1/optimization/recommendations/{id}/dismiss": {
+      "post": {
+        "operationId": "OptimizationController_dismiss",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Dismiss an optimization recommendation",
+        "tags": [
+          "optimization"
+        ]
+      }
+    },
     "/api/v1/jobs": {
       "get": {
         "operationId": "JobsController_list",
-        "parameters": [],
+        "parameters": [
+          {
+            "name": "status",
+            "required": true,
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
         "responses": {
           "200": {
             "description": ""
@@ -461,7 +2830,16 @@
     "/api/v1/jobs/{id}": {
       "get": {
         "operationId": "JobsController_get",
-        "parameters": [],
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
         "responses": {
           "200": {
             "description": ""
@@ -475,6 +2853,965 @@
         "summary": "Get a workspace system job",
         "tags": [
           "jobs"
+        ]
+      }
+    },
+    "/api/v1/leads/{id}/outreach-eligibility": {
+      "get": {
+        "operationId": "OutreachController_eligibility",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Check backend outreach eligibility for a lead",
+        "tags": [
+          "outreach"
+        ]
+      }
+    },
+    "/api/v1/leads/{id}/outreach/generate": {
+      "post": {
+        "operationId": "OutreachController_generate",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/GenerateOutreachDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Generate personalized outreach for a lead",
+        "tags": [
+          "outreach"
+        ]
+      }
+    },
+    "/api/v1/outreach": {
+      "get": {
+        "operationId": "OutreachController_list",
+        "parameters": [
+          {
+            "name": "status",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "strategy",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "leadId",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          },
+          {
+            "name": "contactId",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          },
+          {
+            "name": "dateFrom",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "dateTo",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "replied",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "boolean"
+            }
+          },
+          {
+            "name": "page",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "default": 1,
+              "allOf": [
+                {
+                  "$ref": "#/components/schemas/Object"
+                }
+              ]
+            }
+          },
+          {
+            "name": "limit",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "default": 20,
+              "allOf": [
+                {
+                  "$ref": "#/components/schemas/Object"
+                }
+              ]
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "List outreach messages",
+        "tags": [
+          "outreach"
+        ]
+      }
+    },
+    "/api/v1/outreach/{id}": {
+      "get": {
+        "operationId": "OutreachController_get",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Get outreach detail",
+        "tags": [
+          "outreach"
+        ]
+      },
+      "patch": {
+        "operationId": "OutreachController_update",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateOutreachDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Edit outreach subject/body",
+        "tags": [
+          "outreach"
+        ]
+      }
+    },
+    "/api/v1/outreach/{id}/create-draft": {
+      "post": {
+        "operationId": "OutreachController_createDraft",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Create a Gmail draft after eligibility checks",
+        "tags": [
+          "outreach"
+        ]
+      }
+    },
+    "/api/v1/outreach/{id}/approve": {
+      "post": {
+        "operationId": "OutreachController_approve",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Approve outreach for sending",
+        "tags": [
+          "outreach"
+        ]
+      }
+    },
+    "/api/v1/outreach/{id}/send": {
+      "post": {
+        "operationId": "OutreachController_send",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "idempotency-key",
+            "required": true,
+            "in": "header",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SendOutreachDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Send approved outreach with idempotency protection",
+        "tags": [
+          "outreach"
+        ]
+      }
+    },
+    "/api/v1/outreach/{id}/cancel": {
+      "post": {
+        "operationId": "OutreachController_cancel",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Cancel outreach",
+        "tags": [
+          "outreach"
+        ]
+      }
+    },
+    "/api/v1/outreach/{id}/follow-up/generate": {
+      "post": {
+        "operationId": "OutreachController_generateFollowUp",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Generate one eligible follow-up",
+        "tags": [
+          "outreach"
+        ]
+      }
+    },
+    "/api/v1/outreach/{id}/follow-up/create-draft": {
+      "post": {
+        "operationId": "OutreachController_createFollowUpDraft",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Create Gmail draft for one eligible follow-up",
+        "tags": [
+          "outreach"
+        ]
+      }
+    },
+    "/api/v1/follow-ups/due": {
+      "get": {
+        "operationId": "OutreachController_dueFollowUps",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "List outreach messages eligible for one follow-up",
+        "tags": [
+          "outreach"
+        ]
+      }
+    },
+    "/api/v1/replies": {
+      "get": {
+        "operationId": "RepliesController_list",
+        "parameters": [
+          {
+            "name": "classification",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "needsResponse",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "boolean"
+            }
+          },
+          {
+            "name": "page",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "default": 1,
+              "allOf": [
+                {
+                  "$ref": "#/components/schemas/Object"
+                }
+              ]
+            }
+          },
+          {
+            "name": "limit",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "default": 20,
+              "allOf": [
+                {
+                  "$ref": "#/components/schemas/Object"
+                }
+              ]
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "List tracked Gmail replies",
+        "tags": [
+          "replies"
+        ]
+      }
+    },
+    "/api/v1/replies/{id}": {
+      "get": {
+        "operationId": "RepliesController_get",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Get reply detail",
+        "tags": [
+          "replies"
+        ]
+      }
+    },
+    "/api/v1/replies/{id}/reclassify": {
+      "post": {
+        "operationId": "RepliesController_reclassify",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Re-run AI/deterministic reply classification",
+        "tags": [
+          "replies"
+        ]
+      }
+    },
+    "/api/v1/reports/weekly": {
+      "get": {
+        "operationId": "ReportsController_list",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "List weekly automation reports",
+        "tags": [
+          "reports"
+        ]
+      }
+    },
+    "/api/v1/reports/weekly/generate": {
+      "post": {
+        "operationId": "ReportsController_generate",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Generate this week's automation report now",
+        "tags": [
+          "reports"
+        ]
+      }
+    },
+    "/api/v1/reports/weekly/{id}": {
+      "get": {
+        "operationId": "ReportsController_get",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Get weekly report detail",
+        "tags": [
+          "reports"
+        ]
+      }
+    },
+    "/api/v1/shortlists": {
+      "get": {
+        "operationId": "ShortlistsController_list",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "List generated shortlists",
+        "tags": [
+          "shortlists"
+        ]
+      }
+    },
+    "/api/v1/shortlist/current": {
+      "get": {
+        "operationId": "ShortlistsController_current",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Get the latest generated shortlist",
+        "tags": [
+          "shortlists"
+        ]
+      }
+    },
+    "/api/v1/shortlists/{id}": {
+      "get": {
+        "operationId": "ShortlistsController_get",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Get a generated shortlist with ranked items",
+        "tags": [
+          "shortlists"
+        ]
+      }
+    },
+    "/api/v1/social-profiles": {
+      "get": {
+        "operationId": "SocialProfilesController_list",
+        "parameters": [
+          {
+            "name": "platform",
+            "required": true,
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "List linked social profiles for the workspace",
+        "tags": [
+          "social-profiles"
+        ]
+      }
+    },
+    "/api/v1/settings/suppression": {
+      "get": {
+        "operationId": "SuppressionController_list",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "List suppressed emails/domains/contacts",
+        "tags": [
+          "suppression"
+        ]
+      },
+      "post": {
+        "operationId": "SuppressionController_create",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateSuppressionDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Add suppression entry",
+        "tags": [
+          "suppression"
+        ]
+      }
+    },
+    "/api/v1/settings/suppression/{id}": {
+      "delete": {
+        "operationId": "SuppressionController_delete",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Remove suppression entry",
+        "tags": [
+          "suppression"
+        ]
+      }
+    },
+    "/api/v1/telegram/sources": {
+      "get": {
+        "operationId": "TelegramSourcesController_list",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "List configured Telegram channels/groups",
+        "tags": [
+          "telegram"
+        ]
+      },
+      "post": {
+        "operationId": "TelegramSourcesController_create",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateTelegramSourceDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Add a Telegram channel/group to monitor",
+        "tags": [
+          "telegram"
+        ]
+      }
+    },
+    "/api/v1/telegram/sources/{id}/sync": {
+      "post": {
+        "operationId": "TelegramSourcesController_syncNow",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Request a sync for a configured Telegram source",
+        "tags": [
+          "telegram"
+        ]
+      }
+    },
+    "/api/v1/telegram/sources/{id}": {
+      "patch": {
+        "operationId": "TelegramSourcesController_update",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateTelegramSourceDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Update a Telegram source",
+        "tags": [
+          "telegram"
+        ]
+      },
+      "delete": {
+        "operationId": "TelegramSourcesController_delete",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Remove a Telegram source",
+        "tags": [
+          "telegram"
         ]
       }
     },
@@ -500,6 +3837,16 @@
       "patch": {
         "operationId": "SettingsController_update",
         "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateSettingsDto"
+              }
+            }
+          }
+        },
         "responses": {
           "200": {
             "description": ""
@@ -596,6 +3943,1222 @@
         "name": "X-Workspace-Id"
       }
     },
-    "schemas": {}
+    "schemas": {
+      "UpdateActionItemDto": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "string",
+            "enum": [
+              "PENDING",
+              "COMPLETED",
+              "SKIPPED",
+              "EXPIRED"
+            ]
+          },
+          "content": {
+            "type": "string"
+          }
+        }
+      },
+      "WebsiteAnalysisDto": {
+        "type": "object",
+        "properties": {
+          "url": {
+            "type": "string",
+            "example": "https://exampleagency.com"
+          },
+          "force": {
+            "type": "boolean",
+            "default": false
+          }
+        },
+        "required": [
+          "url"
+        ]
+      },
+      "CreateAutomationRuleDto": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "example": "Weekly Lead Hunt"
+          },
+          "type": {
+            "type": "string",
+            "enum": [
+              "WEEKLY_LEAD_HUNT",
+              "GMAIL_REPLY_SYNC",
+              "FOLLOW_UP_SCAN",
+              "ANALYTICS_REFRESH",
+              "WEEKLY_REPORT"
+            ]
+          },
+          "enabled": {
+            "type": "boolean"
+          },
+          "timezone": {
+            "type": "string"
+          },
+          "cronExpression": {
+            "type": "string"
+          },
+          "configuration": {
+            "type": "object"
+          }
+        },
+        "required": [
+          "name",
+          "type"
+        ]
+      },
+      "UpdateAutomationRuleDto": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "enabled": {
+            "type": "boolean"
+          },
+          "timezone": {
+            "type": "string"
+          },
+          "cronExpression": {
+            "type": "string"
+          },
+          "configuration": {
+            "type": "object"
+          }
+        }
+      },
+      "MockGmailReplyDto": {
+        "type": "object",
+        "properties": {
+          "outreachId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "fromEmail": {
+            "type": "string",
+            "example": "client@example.com"
+          },
+          "subject": {
+            "type": "string",
+            "example": "Re: Mobile development support"
+          },
+          "body": {
+            "type": "string",
+            "example": "Yes, we occasionally need Flutter support. Can you send your portfolio?"
+          }
+        },
+        "required": [
+          "outreachId",
+          "fromEmail",
+          "body"
+        ]
+      },
+      "WebSearchDto": {
+        "type": "object",
+        "properties": {
+          "query": {
+            "type": "string",
+            "example": "\"web agency\" \"mobile app development\" Dubai"
+          },
+          "limit": {
+            "type": "number",
+            "minimum": 1,
+            "maximum": 20,
+            "default": 10
+          }
+        },
+        "required": [
+          "query"
+        ]
+      },
+      "ManualSocialImportDto": {
+        "type": "object",
+        "properties": {
+          "platform": {
+            "type": "string",
+            "enum": [
+              "REDDIT",
+              "X",
+              "TELEGRAM"
+            ],
+            "default": "REDDIT"
+          },
+          "title": {
+            "type": "string",
+            "example": "Need Flutter help for MVP"
+          },
+          "content": {
+            "type": "string",
+            "example": "I'm building an MVP and need an experienced Flutter developer to help complete the mobile app."
+          },
+          "sourceUrl": {
+            "type": "string",
+            "example": "https://reddit.com/r/startups/comments/example"
+          },
+          "profileUrl": {
+            "type": "string",
+            "example": "https://reddit.com/u/example"
+          },
+          "username": {
+            "type": "string",
+            "example": "saas_founder"
+          },
+          "displayName": {
+            "type": "string",
+            "example": "SaaS Founder"
+          }
+        },
+        "required": [
+          "content"
+        ]
+      },
+      "CreateCampaignDto": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "strategy": {
+            "type": "string",
+            "enum": [
+              "AGENCY_PARTNERSHIP",
+              "ACTIVE_REQUIREMENT",
+              "MVP_STARTUP",
+              "EXISTING_APP_FIX",
+              "FIREBASE_API_SUPPORT",
+              "APP_STORE_SUPPORT",
+              "GENERAL_MOBILE_SUPPORT",
+              "CUSTOM"
+            ]
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "DRAFT",
+              "ACTIVE",
+              "PAUSED",
+              "ARCHIVED"
+            ]
+          },
+          "minimumScore": {
+            "type": "number",
+            "default": 82
+          },
+          "weeklyLimit": {
+            "type": "number",
+            "default": 20
+          },
+          "autoSendEnabled": {
+            "type": "boolean",
+            "default": false
+          },
+          "autoSendThreshold": {
+            "type": "number",
+            "default": 92
+          },
+          "followUpDays": {
+            "type": "number",
+            "default": 7
+          },
+          "followUpMode": {
+            "type": "string",
+            "enum": [
+              "MANUAL",
+              "DRAFT",
+              "AUTO"
+            ]
+          },
+          "maxFollowUps": {
+            "type": "number",
+            "default": 1
+          },
+          "targeting": {
+            "type": "object"
+          }
+        }
+      },
+      "UpdateCampaignDto": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "strategy": {
+            "type": "string",
+            "enum": [
+              "AGENCY_PARTNERSHIP",
+              "ACTIVE_REQUIREMENT",
+              "MVP_STARTUP",
+              "EXISTING_APP_FIX",
+              "FIREBASE_API_SUPPORT",
+              "APP_STORE_SUPPORT",
+              "GENERAL_MOBILE_SUPPORT",
+              "CUSTOM"
+            ]
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "DRAFT",
+              "ACTIVE",
+              "PAUSED",
+              "ARCHIVED"
+            ]
+          },
+          "minimumScore": {
+            "type": "number",
+            "default": 82
+          },
+          "weeklyLimit": {
+            "type": "number",
+            "default": 20
+          },
+          "autoSendEnabled": {
+            "type": "boolean",
+            "default": false
+          },
+          "autoSendThreshold": {
+            "type": "number",
+            "default": 92
+          },
+          "followUpDays": {
+            "type": "number",
+            "default": 7
+          },
+          "followUpMode": {
+            "type": "string",
+            "enum": [
+              "MANUAL",
+              "DRAFT",
+              "AUTO"
+            ]
+          },
+          "maxFollowUps": {
+            "type": "number",
+            "default": 1
+          },
+          "targeting": {
+            "type": "object"
+          }
+        }
+      },
+      "CreateLeadFeedbackDto": {
+        "type": "object",
+        "properties": {
+          "rating": {
+            "type": "string",
+            "enum": [
+              "LIKE",
+              "NEUTRAL",
+              "DISLIKE"
+            ]
+          },
+          "reason": {
+            "type": "string"
+          },
+          "notes": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "rating"
+        ]
+      },
+      "CreateLeadHuntDto": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "example": "Agency partner discovery run"
+          },
+          "sources": {
+            "example": [
+              "WEB"
+            ],
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "countries": {
+            "example": [
+              "United Kingdom",
+              "United Arab Emirates"
+            ],
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "categories": {
+            "example": [
+              "WEB_AGENCY"
+            ],
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "maxQueries": {
+            "type": "number",
+            "minimum": 1,
+            "maximum": 50,
+            "default": 8
+          },
+          "maxDiscoveries": {
+            "type": "number",
+            "minimum": 1,
+            "maximum": 200,
+            "default": 80
+          },
+          "minimumScore": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 100,
+            "default": 82
+          },
+          "shortlistLimit": {
+            "type": "number",
+            "minimum": 1,
+            "maximum": 100,
+            "default": 20
+          }
+        }
+      },
+      "CreateSearchQueryDto": {
+        "type": "object",
+        "properties": {
+          "query": {
+            "type": "string",
+            "example": "\"web agency\" \"mobile app development\" Dubai"
+          },
+          "source": {
+            "type": "string",
+            "enum": [
+              "X",
+              "REDDIT",
+              "TELEGRAM",
+              "WEB",
+              "AGENCY_DIRECTORY",
+              "LINKEDIN",
+              "OTHER",
+              "MANUAL"
+            ],
+            "default": "WEB"
+          },
+          "enabled": {
+            "type": "boolean",
+            "default": true
+          },
+          "priority": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 100,
+            "default": 0
+          },
+          "country": {
+            "type": "string",
+            "example": "United Arab Emirates"
+          },
+          "category": {
+            "type": "string",
+            "example": "WEB_AGENCY"
+          }
+        },
+        "required": [
+          "query"
+        ]
+      },
+      "UpdateSearchQueryDto": {
+        "type": "object",
+        "properties": {
+          "query": {
+            "type": "string",
+            "example": "\"web agency\" \"mobile app development\" Dubai"
+          },
+          "source": {
+            "type": "string",
+            "enum": [
+              "X",
+              "REDDIT",
+              "TELEGRAM",
+              "WEB",
+              "AGENCY_DIRECTORY",
+              "LINKEDIN",
+              "OTHER",
+              "MANUAL"
+            ],
+            "default": "WEB"
+          },
+          "enabled": {
+            "type": "boolean",
+            "default": true
+          },
+          "priority": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 100,
+            "default": 0
+          },
+          "country": {
+            "type": "string",
+            "example": "United Arab Emirates"
+          },
+          "category": {
+            "type": "string",
+            "example": "WEB_AGENCY"
+          }
+        }
+      },
+      "CreateCompanyDto": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "example": "Northstar Digital"
+          },
+          "domain": {
+            "type": "string",
+            "example": "northstar.example"
+          },
+          "website": {
+            "type": "string",
+            "example": "https://northstar.example"
+          },
+          "description": {
+            "type": "string"
+          },
+          "country": {
+            "type": "string"
+          },
+          "city": {
+            "type": "string"
+          },
+          "employeeRange": {
+            "type": "string"
+          },
+          "companyType": {
+            "type": "string"
+          },
+          "agencyType": {
+            "type": "string"
+          },
+          "services": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "technologies": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "industries": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "hasWebService": {
+            "type": "boolean"
+          },
+          "hasBackendService": {
+            "type": "boolean"
+          },
+          "hasMobileService": {
+            "type": "boolean"
+          },
+          "partnershipFitScore": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 100
+          }
+        },
+        "required": [
+          "name"
+        ]
+      },
+      "AnalyzeLeadDto": {
+        "type": "object",
+        "properties": {
+          "force": {
+            "type": "boolean",
+            "default": false
+          }
+        }
+      },
+      "UpdateCompanyDto": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "example": "Northstar Digital"
+          },
+          "domain": {
+            "type": "string",
+            "example": "northstar.example"
+          },
+          "website": {
+            "type": "string",
+            "example": "https://northstar.example"
+          },
+          "description": {
+            "type": "string"
+          },
+          "country": {
+            "type": "string"
+          },
+          "city": {
+            "type": "string"
+          },
+          "employeeRange": {
+            "type": "string"
+          },
+          "companyType": {
+            "type": "string"
+          },
+          "agencyType": {
+            "type": "string"
+          },
+          "services": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "technologies": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "industries": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "hasWebService": {
+            "type": "boolean"
+          },
+          "hasBackendService": {
+            "type": "boolean"
+          },
+          "hasMobileService": {
+            "type": "boolean"
+          },
+          "partnershipFitScore": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 100
+          }
+        }
+      },
+      "CreateContactDto": {
+        "type": "object",
+        "properties": {
+          "companyId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "fullName": {
+            "type": "string",
+            "example": "James Smith"
+          },
+          "role": {
+            "type": "string",
+            "example": "Founder"
+          },
+          "email": {
+            "type": "string",
+            "example": "james@example.com"
+          },
+          "emailStatus": {
+            "type": "string",
+            "enum": [
+              "UNKNOWN",
+              "GUESSED",
+              "LIKELY_VALID",
+              "UNVERIFIED",
+              "VERIFIED",
+              "INVALID",
+              "BOUNCED"
+            ]
+          },
+          "emailSource": {
+            "type": "string"
+          },
+          "linkedinUrl": {
+            "type": "string"
+          },
+          "xUrl": {
+            "type": "string"
+          },
+          "decisionMakerScore": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 100
+          },
+          "contactConfidence": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 100
+          }
+        },
+        "required": [
+          "fullName"
+        ]
+      },
+      "UpdateContactDto": {
+        "type": "object",
+        "properties": {
+          "companyId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "fullName": {
+            "type": "string",
+            "example": "James Smith"
+          },
+          "role": {
+            "type": "string",
+            "example": "Founder"
+          },
+          "email": {
+            "type": "string",
+            "example": "james@example.com"
+          },
+          "emailStatus": {
+            "type": "string",
+            "enum": [
+              "UNKNOWN",
+              "GUESSED",
+              "LIKELY_VALID",
+              "UNVERIFIED",
+              "VERIFIED",
+              "INVALID",
+              "BOUNCED"
+            ]
+          },
+          "emailSource": {
+            "type": "string"
+          },
+          "linkedinUrl": {
+            "type": "string"
+          },
+          "xUrl": {
+            "type": "string"
+          },
+          "decisionMakerScore": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 100
+          },
+          "contactConfidence": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 100
+          }
+        }
+      },
+      "CreateLeadDto": {
+        "type": "object",
+        "properties": {
+          "companyId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "contactId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "primarySource": {
+            "type": "string",
+            "enum": [
+              "X",
+              "REDDIT",
+              "TELEGRAM",
+              "WEB",
+              "AGENCY_DIRECTORY",
+              "LINKEDIN",
+              "OTHER",
+              "MANUAL"
+            ],
+            "default": "MANUAL"
+          },
+          "leadType": {
+            "type": "string",
+            "enum": [
+              "AGENCY_PARTNER",
+              "ACTIVE_REQUIREMENT",
+              "BUSINESS_OPPORTUNITY",
+              "MVP_STARTUP",
+              "EXISTING_APP_FIX",
+              "FIREBASE_API_SUPPORT",
+              "APP_STORE_SUPPORT",
+              "GENERAL_MOBILE_SUPPORT",
+              "MANUAL",
+              "INVALID",
+              "PERMANENT_JOB",
+              "OTHER"
+            ],
+            "default": "MANUAL"
+          },
+          "title": {
+            "type": "string",
+            "example": "Agency mobile delivery partnership"
+          },
+          "opportunitySummary": {
+            "type": "string"
+          },
+          "recommendedPitch": {
+            "type": "string"
+          },
+          "sourceUrl": {
+            "type": "string",
+            "example": "https://x.com/example/status/1"
+          },
+          "sourceContent": {
+            "type": "string",
+            "example": "Looking for a Flutter developer to finish our app this month."
+          },
+          "publishedAt": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "NEW",
+              "ANALYZING",
+              "QUALIFIED",
+              "SHORTLISTED",
+              "DRAFTED",
+              "APPROVED",
+              "CONTACTED",
+              "FOLLOW_UP",
+              "REPLIED",
+              "INTERESTED",
+              "MEETING",
+              "PROPOSAL",
+              "WON",
+              "LOST",
+              "NOT_INTERESTED",
+              "DO_NOT_CONTACT",
+              "INVALID",
+              "STALE",
+              "ARCHIVED"
+            ]
+          },
+          "overallScore": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 100,
+            "default": 0
+          }
+        },
+        "required": [
+          "primarySource",
+          "leadType",
+          "title"
+        ]
+      },
+      "ScoreOverrideDto": {
+        "type": "object",
+        "properties": {
+          "score": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 100,
+            "example": 88
+          },
+          "reason": {
+            "type": "string",
+            "example": "Stronger fit after manual review of portfolio."
+          }
+        },
+        "required": [
+          "score",
+          "reason"
+        ]
+      },
+      "UpdateLeadDto": {
+        "type": "object",
+        "properties": {
+          "companyId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "contactId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "primarySource": {
+            "type": "string",
+            "enum": [
+              "X",
+              "REDDIT",
+              "TELEGRAM",
+              "WEB",
+              "AGENCY_DIRECTORY",
+              "LINKEDIN",
+              "OTHER",
+              "MANUAL"
+            ],
+            "default": "MANUAL"
+          },
+          "leadType": {
+            "type": "string",
+            "enum": [
+              "AGENCY_PARTNER",
+              "ACTIVE_REQUIREMENT",
+              "BUSINESS_OPPORTUNITY",
+              "MVP_STARTUP",
+              "EXISTING_APP_FIX",
+              "FIREBASE_API_SUPPORT",
+              "APP_STORE_SUPPORT",
+              "GENERAL_MOBILE_SUPPORT",
+              "MANUAL",
+              "INVALID",
+              "PERMANENT_JOB",
+              "OTHER"
+            ],
+            "default": "MANUAL"
+          },
+          "title": {
+            "type": "string",
+            "example": "Agency mobile delivery partnership"
+          },
+          "opportunitySummary": {
+            "type": "string"
+          },
+          "recommendedPitch": {
+            "type": "string"
+          },
+          "sourceUrl": {
+            "type": "string",
+            "example": "https://x.com/example/status/1"
+          },
+          "sourceContent": {
+            "type": "string",
+            "example": "Looking for a Flutter developer to finish our app this month."
+          },
+          "publishedAt": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "NEW",
+              "ANALYZING",
+              "QUALIFIED",
+              "SHORTLISTED",
+              "DRAFTED",
+              "APPROVED",
+              "CONTACTED",
+              "FOLLOW_UP",
+              "REPLIED",
+              "INTERESTED",
+              "MEETING",
+              "PROPOSAL",
+              "WON",
+              "LOST",
+              "NOT_INTERESTED",
+              "DO_NOT_CONTACT",
+              "INVALID",
+              "STALE",
+              "ARCHIVED"
+            ]
+          },
+          "overallScore": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 100,
+            "default": 0
+          },
+          "temperature": {
+            "type": "string",
+            "enum": [
+              "HOT",
+              "STRONG",
+              "REVIEW",
+              "WEAK",
+              "REJECT"
+            ]
+          }
+        }
+      },
+      "GenerateOutreachDto": {
+        "type": "object",
+        "properties": {
+          "strategy": {
+            "type": "string",
+            "enum": [
+              "AGENCY_PARTNERSHIP",
+              "ACTIVE_REQUIREMENT",
+              "MVP_STARTUP",
+              "EXISTING_APP_FIX",
+              "FIREBASE_API_SUPPORT",
+              "APP_STORE_SUPPORT",
+              "GENERAL_MOBILE_SUPPORT",
+              "CUSTOM"
+            ]
+          },
+          "instruction": {
+            "type": "string",
+            "example": "Make it shorter and more technical."
+          },
+          "campaignId": {
+            "type": "string",
+            "format": "uuid"
+          }
+        }
+      },
+      "Object": {
+        "type": "object",
+        "properties": {}
+      },
+      "UpdateOutreachDto": {
+        "type": "object",
+        "properties": {
+          "subject": {
+            "type": "string"
+          },
+          "body": {
+            "type": "string"
+          }
+        }
+      },
+      "SendOutreachDto": {
+        "type": "object",
+        "properties": {
+          "idempotencyKey": {
+            "type": "string",
+            "description": "Idempotency key to prevent double-send on retries."
+          }
+        }
+      },
+      "CreateSuppressionDto": {
+        "type": "object",
+        "properties": {
+          "email": {
+            "type": "string"
+          },
+          "domain": {
+            "type": "string"
+          },
+          "contactId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "reason": {
+            "type": "string",
+            "example": "Recipient requested no further contact."
+          }
+        },
+        "required": [
+          "reason"
+        ]
+      },
+      "CreateTelegramSourceDto": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "example": "Flutter Jobs"
+          },
+          "username": {
+            "type": "string",
+            "example": "flutter_jobs"
+          },
+          "externalId": {
+            "type": "string",
+            "example": "-100123456789"
+          },
+          "type": {
+            "type": "string",
+            "example": "CHANNEL"
+          },
+          "keywords": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "notes": {
+            "type": "string"
+          },
+          "enabled": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "name",
+          "type"
+        ]
+      },
+      "UpdateTelegramSourceDto": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "example": "Flutter Jobs"
+          },
+          "username": {
+            "type": "string",
+            "example": "flutter_jobs"
+          },
+          "externalId": {
+            "type": "string",
+            "example": "-100123456789"
+          },
+          "type": {
+            "type": "string",
+            "example": "CHANNEL"
+          },
+          "keywords": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "notes": {
+            "type": "string"
+          },
+          "enabled": {
+            "type": "boolean"
+          }
+        }
+      },
+      "ProfileSettingsDto": {
+        "type": "object",
+        "properties": {}
+      },
+      "TargetingSettingsDto": {
+        "type": "object",
+        "properties": {}
+      },
+      "DiscoverySettingsDto": {
+        "type": "object",
+        "properties": {}
+      },
+      "UpdateSettingsDto": {
+        "type": "object",
+        "properties": {
+          "profile": {
+            "$ref": "#/components/schemas/ProfileSettingsDto"
+          },
+          "targeting": {
+            "$ref": "#/components/schemas/TargetingSettingsDto"
+          },
+          "scoring": {
+            "type": "object",
+            "description": "Eight scoring weights that must total 100."
+          },
+          "discovery": {
+            "$ref": "#/components/schemas/DiscoverySettingsDto"
+          },
+          "outreachPaused": {
+            "type": "boolean"
+          },
+          "emailMode": {
+            "type": "string",
+            "enum": [
+              "DRAFT_FIRST",
+              "APPROVE_AND_SEND",
+              "AUTOMATIC"
+            ]
+          },
+          "weeklyEmailLimit": {
+            "type": "number"
+          },
+          "autoSendEnabled": {
+            "type": "boolean"
+          },
+          "autoSendMinimumScore": {
+            "type": "number"
+          },
+          "autoSendDailyLimit": {
+            "type": "number"
+          },
+          "autoGenerateOutreachDrafts": {
+            "type": "boolean"
+          },
+          "automationPaused": {
+            "type": "boolean"
+          },
+          "automationKillSwitch": {
+            "type": "boolean"
+          },
+          "timezone": {
+            "type": "string"
+          },
+          "outreachBusinessHoursStart": {
+            "type": "string"
+          },
+          "outreachBusinessHoursEnd": {
+            "type": "string"
+          },
+          "outreachBusinessDays": {
+            "type": "array",
+            "items": {
+              "type": "number"
+            }
+          },
+          "sourcePriorities": {
+            "type": "object"
+          },
+          "discoveryBudgetAllocation": {
+            "type": "object"
+          },
+          "optimizationSettings": {
+            "type": "object"
+          },
+          "staleLeadTtls": {
+            "type": "object"
+          },
+          "sendOwnerEmailAlerts": {
+            "type": "boolean"
+          },
+          "dailyDigestEnabled": {
+            "type": "boolean"
+          },
+          "scoreJumpThreshold": {
+            "type": "number"
+          },
+          "followUpDelayDays": {
+            "type": "number"
+          },
+          "followUpMode": {
+            "type": "string",
+            "enum": [
+              "DRAFT",
+              "OFF"
+            ]
+          },
+          "maxFollowUps": {
+            "type": "number"
+          },
+          "coldOutreachCooldownDays": {
+            "type": "number"
+          },
+          "maxNewContactsPerCompanyPer30Days": {
+            "type": "number"
+          },
+          "emailSignature": {
+            "type": "string"
+          },
+          "optOutFooter": {
+            "type": "string"
+          }
+        }
+      }
+    }
   }
 }

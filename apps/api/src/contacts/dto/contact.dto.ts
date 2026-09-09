@@ -1,25 +1,35 @@
-import { ApiProperty, ApiPropertyOptional, PartialType } from '@nestjs/swagger';
-import { Type } from 'class-transformer';
-import { IsEmail, IsEnum, IsInt, IsOptional, IsString, IsUrl, IsUUID, Max, Min } from 'class-validator';
-import { EmailStatus } from '@prisma/client';
-import { PaginationDto } from '../../common/pagination.dto';
+import { ApiProperty, ApiPropertyOptional, PartialType } from "@nestjs/swagger";
+import { Type } from "class-transformer";
+import {
+  IsEmail,
+  IsEnum,
+  IsInt,
+  IsOptional,
+  IsString,
+  IsUrl,
+  IsUUID,
+  Max,
+  Min,
+} from "class-validator";
+import { EmailStatus } from "@prisma/client";
+import { PaginationDto } from "../../common/pagination.dto";
 
 export class CreateContactDto {
-  @ApiPropertyOptional({ format: 'uuid' })
+  @ApiPropertyOptional({ format: "uuid" })
   @IsOptional()
   @IsUUID()
   companyId?: string;
 
-  @ApiProperty({ example: 'James Smith' })
+  @ApiProperty({ example: "James Smith" })
   @IsString()
   fullName: string;
 
-  @ApiPropertyOptional({ example: 'Founder' })
+  @ApiPropertyOptional({ example: "Founder" })
   @IsOptional()
   @IsString()
   role?: string;
 
-  @ApiPropertyOptional({ example: 'james@example.com' })
+  @ApiPropertyOptional({ example: "james@example.com" })
   @IsOptional()
   @IsEmail()
   email?: string;
@@ -69,7 +79,7 @@ export class ContactQueryDto extends PaginationDto {
   @IsString()
   search?: string;
 
-  @ApiPropertyOptional({ format: 'uuid' })
+  @ApiPropertyOptional({ format: "uuid" })
   @IsOptional()
   @IsUUID()
   companyId?: string;
