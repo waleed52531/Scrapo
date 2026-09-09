@@ -5,7 +5,7 @@ services:
     region: singapore
     plan: free
     branch: main
-    buildCommand: corepack enable && pnpm install --frozen-lockfile && pnpm db:generate && pnpm --filter @scrapo/api build
+    buildCommand: npm install -g pnpm@11.25.0 && pnpm install --frozen-lockfile && pnpm db:generate && pnpm --filter @scrapo/api build
     preDeployCommand: pnpm db:migrate:deploy
     startCommand: pnpm start:api
     healthCheckPath: /api/v1/health
@@ -73,7 +73,7 @@ services:
     region: singapore
     plan: free
     branch: main
-    buildCommand: corepack enable && pnpm install --frozen-lockfile && pnpm db:generate && pnpm --filter @scrapo/worker build
+    buildCommand: npm install -g pnpm@11.25.0 && pnpm install --frozen-lockfile && pnpm db:generate && pnpm --filter @scrapo/worker build
     startCommand: pnpm start:worker
     envVars:
       - key: NODE_ENV

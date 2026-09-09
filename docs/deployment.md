@@ -17,6 +17,7 @@ Required public variables:
 Build/start:
 
 ```bash
+npm install -g pnpm@11.25.0
 pnpm --filter @scrapo/web build
 pnpm start:web
 ```
@@ -59,6 +60,7 @@ for smoke testing.
 Build/start:
 
 ```bash
+npm install -g pnpm@11.25.0
 pnpm --filter @scrapo/api build
 pnpm start:api
 ```
@@ -82,6 +84,7 @@ Do not use the Upstash REST URL for BullMQ.
 Build/start:
 
 ```bash
+npm install -g pnpm@11.25.0
 pnpm --filter @scrapo/worker build
 pnpm start:worker
 ```
