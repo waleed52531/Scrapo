@@ -9,19 +9,49 @@ import { AppModule } from "./app.module";
 import { ApiExceptionFilter } from "./common/api-exception.filter";
 import { ApiResponseInterceptor } from "./common/api-response.interceptor";
 
+function normalizeOrigin(origin: string) {
+  return origin
+    .trim()
+    .replace(/^["']|["']$/g, "")
+    .replace(/\/+$/g, "");
+}
+
+function getAllowedCorsOrigins() {
+  const configuredOrigins = [
+    process.env.CORS_ALLOWED_ORIGINS,
+    process.env.WEB_APP_URL,
+    "https://scrapo-web-nine.vercel.app",
+    "http://localhost:3000",
+  ]
+    .filter(Boolean)
+    .flatMap((value) => value!.split(","))
+    .map(normalizeOrigin)
+    .filter(Boolean);
+
+  return new Set(configuredOrigins);
+}
+
 export async function bootstrap() {
   const app = await NestFactory.create(AppModule, { bufferLogs: true });
   app.use(helmet());
   app.enableShutdownHooks();
   app.setGlobalPrefix("api/v1", { exclude: ["api/docs", "api/docs-json"] });
+  const allowedCorsOrigins = getAllowedCorsOrigins();
   app.enableCors({
     origin: (
-      process.env.CORS_ALLOWED_ORIGINS ??
-      process.env.WEB_APP_URL ??
-      "http://localhost:3000"
-    )
-      .split(",")
-      .map((origin) => origin.trim()),
+      origin: string | undefined,
+      callback: (error: Error | null, allow?: boolean) => void,
+    ) => {
+      if (!origin) {
+        callback(null, true);
+        return;
+      }
+
+      const normalizedOrigin = normalizeOrigin(origin);
+      const isAllowed = allowedCorsOrigins.has(normalizedOrigin);
+
+      callback(null, isAllowed);
+    },
     credentials: true,
     allowedHeaders: [
       "Authorization",
