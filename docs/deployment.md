@@ -73,6 +73,12 @@ commands.
 
 The worker must run continuously without web traffic. Required variables match the API for database, Redis, Gmail, provider modes, and safety limits.
 
+Render background workers require a paid worker compute plan. Use the smallest
+worker plan (`0.5c-512mb`) for launch/testing, then scale up only if jobs fall
+behind. Until real Gmail/OpenAI/social provider credentials are configured, run
+the worker with `NODE_ENV=staging`, `GMAIL_PROVIDER_MODE=MOCK`, and provider
+feature flags disabled.
+
 For Upstash Redis with BullMQ/ioredis, use the TCP URL, usually:
 
 ```env

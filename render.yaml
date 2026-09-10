@@ -71,13 +71,13 @@ services:
     name: scrapo-worker
     runtime: node
     region: singapore
-    plan: free
+    plan: 0.5c-512mb
     branch: main
     buildCommand: npm install -g pnpm@11.25.0 && pnpm install --frozen-lockfile && pnpm db:generate && pnpm --filter @scrapo/worker build
     startCommand: pnpm start:worker
     envVars:
       - key: NODE_ENV
-        value: production
+        value: staging
       - key: APP_VERSION
         value: 0.1.0
       - key: DATABASE_URL
@@ -103,7 +103,7 @@ services:
       - key: TELEGRAM_ENABLED
         value: false
       - key: GMAIL_PROVIDER_MODE
-        value: REAL
+        value: MOCK
       - key: GOOGLE_CLIENT_ID
         sync: false
       - key: GOOGLE_CLIENT_SECRET
